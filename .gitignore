@@ -1,0 +1,64 @@
+# Environment & Secret files
+.env
+.env.local
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+ENV/
+
+# Database & Storage
+*.db
+*.sqlite3
+*.log
+
+# Flutter & Dart
+.dart_tool/
+.fvm/
+.idea/
+.packages
+.pub-cache/
+.pub/
+build/
+ios/Pods/
+ios/Runner.xcworkspace/
+android/.gradle/
+android/app/build/
+*.mode1v3
+*.mode2v3
+*.moved-aside
+*.pbxuser
+*.perspectivev3
+**/doc/api/
+**/ios/Flutter/.last_build_id
+
+# IDEs
+.vscode/
+*.swp
+*.swo
+.DS_Store
