@@ -14,10 +14,10 @@ workflows:
           flutter pub get
       - name: Build iOS Application Package (.ipa)
         script: |
-          flutter build ipa --release --no-codesign
+          flutter build ipa --release --no-codesign --target=lib/main.dart
     artifacts:
-      - build/ios/ipa/*.ipa
-      - build/ios/iphoneos/*.app
+      - mobile/build/ios/ipa/*.ipa
+      - mobile/build/ios/iphoneos/*.app
 
   android-workflow:
     name: Android APK Build (CareerLens AI)
@@ -32,6 +32,6 @@ workflows:
           flutter pub get
       - name: Build Release APK
         script: |
-          flutter build apk --release
+          flutter build apk --release --target=lib/main.dart
     artifacts:
-      - build/app/outputs/flutter-apk/*.apk
+      - mobile/build/app/outputs/flutter-apk/*.apk
