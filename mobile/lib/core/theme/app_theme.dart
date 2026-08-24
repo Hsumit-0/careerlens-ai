@@ -55,7 +55,6 @@ class AppTheme {
         backgroundColor: lightBackground,
         elevation: 0,
         centerTitle: true,
-        scaffoldLineWidth: 0,
       ),
       cardTheme: CardTheme(
         color: lightSurface,

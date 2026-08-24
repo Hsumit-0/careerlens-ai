@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/custom_widgets.dart';
-import '../../auth/providers/auth_provider.dart';
+import '../../../auth/providers/auth_provider.dart';
 
 class PlaceholderDashboard extends ConsumerWidget {
   const PlaceholderDashboard({super.key});
