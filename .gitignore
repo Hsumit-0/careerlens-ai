@@ -16,7 +16,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -37,14 +36,14 @@ ENV/
 *.sqlite3
 *.log
 
-# Flutter & Dart
+# Flutter & Dart (Excluding root lib/ so mobile/lib/ is tracked)
 .dart_tool/
 .fvm/
 .idea/
 .packages
 .pub-cache/
 .pub/
-build/
+mobile/build/
 ios/Pods/
 ios/Runner.xcworkspace/
 android/.gradle/
