@@ -17,7 +17,6 @@ class InterviewStudioScreen extends ConsumerStatefulWidget {
 class _InterviewStudioScreenState extends ConsumerState<InterviewStudioScreen> {
   final _textController = TextEditingController();
   bool _isRecording = false;
-  int _elapsedSeconds = 0;
   bool _useVoiceInput = true;
 
   @override
@@ -268,7 +267,7 @@ class _InterviewStudioScreenState extends ConsumerState<InterviewStudioScreen> {
                           Text(
                             _isRecording
                                 ? '🎤 Listening & Analyzing Speech Patterns...'
-                                ? 'Tap Mic to Start Speaking Your Answer',
+                                : 'Tap Mic to Start Speaking Your Answer',
                             style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: _isRecording ? Colors.redAccent : Colors.grey),
                           ),
                           const SizedBox(height: 14),
@@ -303,16 +302,16 @@ class _InterviewStudioScreenState extends ConsumerState<InterviewStudioScreen> {
                   TextField(
                     controller: _textController,
                     maxLines: 4,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: 'Your answer transcript will appear here (or type your detailed answer)...',
-                      contentPadding: const EdgeInsets.all(16),
+                      contentPadding: EdgeInsets.all(16),
                     ),
                   ),
 
                   const SizedBox(height: 20),
 
                   // Submit Answer Button
-                  PrimaryGradientButton(
+                  PrimaryButton(
                     text: currentIdx < totalQ - 1 ? 'Submit & Next Question' : 'Complete & Generate Report',
                     icon: Icons.send_rounded,
                     isLoading: state.isLoading,

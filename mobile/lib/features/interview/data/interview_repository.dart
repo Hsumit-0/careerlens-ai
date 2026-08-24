@@ -29,7 +29,6 @@ class InterviewRepository {
       );
       return InterviewSessionModel.fromJson(response.data);
     } catch (e) {
-      // Fallback preview mock session if backend offline
       return InterviewSessionModel(
         id: 'mock-session-101',
         targetRole: targetRole,
@@ -87,7 +86,7 @@ class InterviewRepository {
         questionId: questionId,
         evaluatedScore: 85.0,
         feedback: "Excellent detailed answer with clear technical context and strong explanation!",
-        suggested_improvement: "Keep up the clear architectural explanations.",
+        suggestedImprovement: "Keep up the clear architectural explanations.",
         isFollowupNeeded: false,
       );
     }

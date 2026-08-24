@@ -1,10 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/api/api_client.dart';
+import '../../../../core/services/secure_storage_service.dart';
 import '../data/interview_repository.dart';
 import '../domain/models/interview_models.dart';
 
 final interviewRepositoryProvider = Provider<InterviewRepository>((ref) {
-  final apiClient = ref.watch(apiClientProvider);
+  final storageService = SecureStorageService();
+  final apiClient = ApiClient(storageService);
   return InterviewRepository(apiClient);
 });
 

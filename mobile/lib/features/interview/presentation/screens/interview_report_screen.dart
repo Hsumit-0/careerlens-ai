@@ -237,7 +237,7 @@ class InterviewReportScreen extends ConsumerWidget {
 
             const SizedBox(height: 28),
 
-            PrimaryGradientButton(
+            PrimaryButton(
               text: 'Back to Career Dashboard',
               icon: Icons.dashboard_rounded,
               onPressed: () => context.go('/dashboard'),

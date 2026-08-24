@@ -189,7 +189,7 @@ class _InterviewSetupScreenState extends ConsumerState<InterviewSetupScreen> {
             const SizedBox(height: 28),
 
             // Start Button
-            PrimaryGradientButton(
+            PrimaryButton(
               text: 'Start AI Mock Interview',
               icon: Icons.play_arrow_rounded,
               isLoading: state.isLoading,
