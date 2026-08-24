@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/custom_widgets.dart';
@@ -99,6 +100,67 @@ class PlaceholderDashboard extends ConsumerWidget {
               ),
             ).animate().fadeIn(duration: 500.ms),
 
+            const SizedBox(height: 20),
+
+            // AI Interview Studio Quick Launch Card
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: AppTheme.primaryGradient,
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.primaryColor.withOpacity(0.3),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          'NEW FEATURE • PHASE 9',
+                          style: GoogleFonts.inter(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      const Icon(Icons.videocam_outlined, color: Colors.white, size: 24),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'AI Interview Studio',
+                    style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Practice realistic mock interviews using your uploaded resume & target job role with speech & camera feedback.',
+                    style: GoogleFonts.inter(fontSize: 12, color: Colors.white70, height: 1.4),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: AppTheme.primaryColor,
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    ),
+                    icon: const Icon(Icons.play_arrow_rounded),
+                    label: const Text('Launch AI Mock Interview'),
+                    onPressed: () => context.push('/interview/setup'),
+                  ),
+                ],
+              ),
+            ).animate().scale(delay: 100.ms, duration: 400.ms),
+
             const SizedBox(height: 24),
 
             Text(
@@ -153,53 +215,6 @@ class PlaceholderDashboard extends ConsumerWidget {
                 ),
               ],
             ).animate().fadeIn(delay: 200.ms, duration: 500.ms),
-
-            const SizedBox(height: 28),
-
-            // Next Steps Banner (Phase 2 Preview)
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppTheme.primaryColor.withOpacity(0.15),
-                    AppTheme.secondaryColor.withOpacity(0.15),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: AppTheme.primaryColor.withOpacity(0.3)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.rocket_launch_outlined, color: AppTheme.primaryColor, size: 24),
-                      const SizedBox(width: 10),
-                      Text(
-                        'Phase 1 Foundation Ready',
-                        style: GoogleFonts.outfit(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.primaryColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Authentication, secure token storage, state management, and Material 3 design system are configured. Ready for Phase 2: Career Onboarding & Skill Profile setup.',
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      height: 1.5,
-                      color: isDark ? Colors.grey.shade300 : Colors.grey.shade800,
-                    ),
-                  ),
-                ],
-              ),
-            ).animate().fadeIn(delay: 400.ms, duration: 500.ms),
           ],
         ),
       ),

@@ -6,6 +6,9 @@ import '../features/auth/presentation/screens/register_screen.dart';
 import '../features/auth/presentation/screens/splash_screen.dart';
 import '../features/auth/providers/auth_provider.dart';
 import '../features/dashboard/presentation/screens/placeholder_dashboard.dart';
+import '../features/interview/presentation/screens/interview_setup_screen.dart';
+import '../features/interview/presentation/screens/interview_studio_screen.dart';
+import '../features/interview/presentation/screens/interview_report_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authNotifierProvider);
@@ -28,6 +31,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/dashboard',
         builder: (context, state) => const PlaceholderDashboard(),
+      ),
+      GoRoute(
+        path: '/interview/setup',
+        builder: (context, state) => const InterviewSetupScreen(),
+      ),
+      GoRoute(
+        path: '/interview/studio',
+        builder: (context, state) => const InterviewStudioScreen(),
+      ),
+      GoRoute(
+        path: '/interview/report',
+        builder: (context, state) => const InterviewReportScreen(),
       ),
     ],
     redirect: (context, state) {
