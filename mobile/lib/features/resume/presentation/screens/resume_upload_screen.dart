@@ -1,78 +1,190 @@
+import 'dart:async';
+import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:dio/dio.dart';
+import '../../../../core/api/api_client.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/custom_widgets.dart';
 
-class ResumeUploadScreen extends StatefulWidget {
+class ResumeUploadScreen extends ConsumerStatefulWidget {
   const ResumeUploadScreen({super.key});
 
   @override
-  State<ResumeUploadScreen> createState() => _ResumeUploadScreenState();
+  ConsumerState<ResumeUploadScreen> createState() => _ResumeUploadScreenState();
 }
 
-class _ResumeUploadScreenState extends State<ResumeUploadScreen> {
-  final List<Map<String, dynamic>> _resumes = [
-    {
-      'id': 'res-1',
-      'fileName': 'Software_Engineer_Resume.pdf',
-      'uploadedAt': '2026-08-26 • 10:45 AM',
-      'isActive': true,
-      'parsedSkills': ['Python (90%)', 'FastAPI (85%)', 'PostgreSQL (80%)', 'Docker (75%)', 'REST APIs'],
-      'projects': ['Async REST API Platform', 'AI Career Intelligence Engine'],
-    },
-  ];
+class _ResumeUploadScreenState extends ConsumerState<ResumeUploadScreen> {
+  List<Map<String, dynamic>> _resumes = [];
+  bool _isLoading = true;
+  List<Map<String, dynamic>> _uploadProgressList = [];
 
-  bool _isUploading = false;
+  @override
+  void initState() {
+    super.initState();
+    _fetchResumes();
+  }
 
-  void _uploadNewResume() {
-    setState(() => _isUploading = true);
-    Future.delayed(const Duration(seconds: 1), () {
-      if (mounted) {
+  Future<void> _fetchResumes() async {
+    setState(() => _isLoading = true);
+    try {
+      final dio = ref.read(apiClientProvider).dio;
+      final response = await dio.get('/resumes/');
+      if (response.data is List) {
         setState(() {
-          _isUploading = false;
-          final newId = 'res-${_resumes.length + 1}';
-          for (var r in _resumes) {
-            r['isActive'] = false;
-          }
-          _resumes.add({
-            'id': newId,
-            'fileName': 'Data_Scientist_CV_${_resumes.length + 1}.pdf',
-            'uploadedAt': 'Just now',
-            'isActive': true,
-            'parsedSkills': ['Python (95%)', 'PyTorch (85%)', 'Pandas (90%)', 'Machine Learning', 'Data Analysis'],
-            'projects': ['Deep Learning Recommendation Engine', 'Predictive Modeling Pipeline'],
-          });
+          _resumes = List<Map<String, dynamic>>.from(response.data);
+          _isLoading = false;
         });
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+    }
+  }
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('New resume uploaded and parsed successfully! Active profile updated.'),
-            backgroundColor: Colors.green,
-          ),
-        );
+  void _triggerNativeFilePicker() {
+    final uploadInput = html.FileUploadInputElement()
+      ..accept = '.pdf'
+      ..multiple = true;
+    uploadInput.click();
+
+    uploadInput.onChange.listen((e) async {
+      final files = uploadInput.files;
+      if (files != null && files.isNotEmpty) {
+        await _uploadFiles(files);
       }
     });
   }
 
-  void _setActiveResume(String id) {
+  Future<void> _uploadFiles(List<html.File> files) async {
+    final dio = ref.read(apiClientProvider).dio;
+
     setState(() {
-      for (var r in _resumes) {
-        r['isActive'] = (r['id'] == id);
-      }
+      _uploadProgressList = files
+          .map((f) => {
+                'name': f.name,
+                'progress': 0.1,
+                'status': 'Uploading...',
+              })
+          .toList();
     });
+
+    final formData = FormData();
+    for (var f in files) {
+      final reader = html.FileReader();
+      reader.readAsArrayBuffer(f);
+      await reader.onLoadEnd.first;
+
+      final bytes = reader.result as List<int>;
+      formData.files.add(MapEntry(
+        'files',
+        MultipartFile.fromBytes(bytes, filename: f.name),
+      ));
+    }
+
+    try {
+      final response = await dio.post(
+        '/resumes/upload',
+        data: formData,
+        onSendProgress: (sent, total) {
+          if (total > 0) {
+            final prog = (sent / total).clamp(0.1, 0.95);
+            setState(() {
+              for (var p in _uploadProgressList) {
+                p['progress'] = prog;
+                p['status'] = '${(prog * 100).toInt()}%';
+              }
+            });
+          }
+        },
+      );
+
+      setState(() {
+        for (var p in _uploadProgressList) {
+          p['progress'] = 1.0;
+          p['status'] = 'Completed!';
+        }
+      });
+
+      await Future.delayed(const Duration(milliseconds: 600));
+      setState(() => _uploadProgressList.clear());
+      await _fetchResumes();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Resumes uploaded and parsed successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() => _uploadProgressList.clear());
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Upload failed: ${e.toString()}'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _setActiveResume(String resumeId) async {
+    try {
+      final dio = ref.read(apiClientProvider).dio;
+      await dio.put('/resumes/$resumeId/active');
+      await _fetchResumes();
+    } catch (e) {}
+  }
+
+  Future<void> _deleteResume(String resumeId) async {
+    try {
+      final dio = ref.read(apiClientProvider).dio;
+      await dio.delete('/resumes/$resumeId');
+      await _fetchResumes();
+    } catch (e) {}
+  }
+
+  Future<void> _renameResume(String resumeId, String oldName) async {
+    final controller = TextEditingController(text: oldName);
+    final newName = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Rename Resume', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(hintText: 'Enter new filename'),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          ElevatedButton(onPressed: () => Navigator.pop(ctx, controller.text.trim()), child: const Text('Save')),
+        ],
+      ),
+    );
+
+    if (newName != null && newName.isNotEmpty && newName != oldName) {
+      try {
+        final dio = ref.read(apiClientProvider).dio;
+        await dio.put('/resumes/$resumeId/rename', data: {'file_name': newName});
+        await _fetchResumes();
+      } catch (e) {}
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final activeResume = _resumes.firstWhere((r) => r['isActive'] == true, orElse: () => _resumes.first);
+    final activeResume = _resumes.firstWhere((r) => r['is_active'] == true, orElse: () => _resumes.isNotEmpty ? _resumes.first : {});
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Resume Manager & Parser',
+          'My Resumes',
           style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 20),
         ),
         actions: [
@@ -98,7 +210,7 @@ class _ResumeUploadScreenState extends State<ResumeUploadScreen> {
                       gradient: AppTheme.primaryGradient,
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: const Icon(Icons.upload_file_outlined, color: Colors.white, size: 28),
+                    child: const Icon(Icons.folder_special_outlined, color: Colors.white, size: 28),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -106,12 +218,12 @@ class _ResumeUploadScreenState extends State<ResumeUploadScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Multi-Resume Management',
+                          'Resume Management',
                           style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Upload multiple resumes, switch active profiles, and parse skills for personalized AI mock interviews.',
+                          'Upload multiple PDF resumes, set active profiles, and run personalized mock interviews.',
                           style: GoogleFonts.inter(fontSize: 12, color: Colors.grey.shade600),
                         ),
                       ],
@@ -121,11 +233,11 @@ class _ResumeUploadScreenState extends State<ResumeUploadScreen> {
               ),
             ).animate().fadeIn(duration: 350.ms),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
-            // Dropzone Box / Upload Button
+            // Dropzone & File Upload Trigger Button
             InkWell(
-              onTap: _isUploading ? null : _uploadNewResume,
+              onTap: _triggerNativeFilePicker,
               borderRadius: BorderRadius.circular(18),
               child: Container(
                 width: double.infinity,
@@ -133,50 +245,78 @@ class _ResumeUploadScreenState extends State<ResumeUploadScreen> {
                 decoration: BoxDecoration(
                   color: isDark ? const Color(0xFF1E293B) : Colors.indigo.shade50.withOpacity(0.5),
                   borderRadius: BorderRadius.circular(18),
-                  border: Border.all(
-                    color: AppTheme.primaryColor.withOpacity(0.4),
-                    width: 2,
-                  ),
+                  border: Border.all(color: AppTheme.primaryColor.withOpacity(0.4), width: 2),
                 ),
                 child: Column(
                   children: [
-                    if (_isUploading) ...[
-                      const CircularProgressIndicator(),
-                      const SizedBox(height: 12),
-                      Text('Extracting Skills & Parsing Projects PDF...', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
-                    ] else ...[
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryColor.withOpacity(0.15),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.cloud_upload_outlined, color: AppTheme.primaryColor, size: 36),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryColor.withOpacity(0.15),
+                        shape: BoxShape.circle,
                       ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Click to Upload PDF or DOCX Resume',
-                        style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Supports multiple resume uploads. Drag and drop or browse files.',
-                        style: GoogleFonts.inter(fontSize: 11, color: Colors.grey),
-                      ),
-                    ],
+                      child: const Icon(Icons.cloud_upload_outlined, color: AppTheme.primaryColor, size: 36),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Click to Choose PDF File(s) from Computer',
+                      style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Opens OS File Browser. Supports single or multiple PDF resume selection.',
+                      style: GoogleFonts.inter(fontSize: 11, color: Colors.grey),
+                    ),
                   ],
                 ),
               ),
             ),
 
+            // Upload Progress Bars
+            if (_uploadProgressList.isNotEmpty) ...[
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppTheme.primaryColor.withOpacity(0.3)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Uploading & Extracting PDF Files...', style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13)),
+                    const SizedBox(height: 10),
+                    ..._uploadProgressList.map((item) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(item['name'], style: GoogleFonts.inter(fontSize: 12)),
+                                  Text(item['status'], style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryColor)),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              LinearProgressIndicator(value: item['progress'] as double),
+                            ],
+                          ),
+                        )),
+                  ],
+                ),
+              ),
+            ],
+
             const SizedBox(height: 28),
 
-            // Uploaded Resumes List Section
+            // Resumes List Header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Your Uploaded Resumes (${_resumes.length})',
+                  'Uploaded Resumes (${_resumes.length})',
                   style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 ElevatedButton.icon(
@@ -186,170 +326,176 @@ class _ResumeUploadScreenState extends State<ResumeUploadScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   ),
                   icon: const Icon(Icons.add_rounded, size: 18),
-                  label: const Text('Upload Another Resume'),
-                  onPressed: _uploadNewResume,
+                  label: const Text('Upload PDF Resume'),
+                  onPressed: _triggerNativeFilePicker,
                 ),
               ],
             ),
             const SizedBox(height: 14),
 
-            ..._resumes.map((res) {
-              final isActive = res['isActive'] == true;
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12.0),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: isActive
-                        ? AppTheme.primaryColor.withOpacity(0.12)
-                        : (isDark ? const Color(0xFF1E293B) : Colors.white),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isActive ? AppTheme.primaryColor : Colors.grey.withOpacity(0.3),
-                      width: isActive ? 2 : 1,
+            if (_isLoading)
+              const Center(child: CircularProgressIndicator())
+            else if (_resumes.isEmpty)
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Center(
+                  child: Text('No resumes uploaded yet. Click above to select your PDF file.', style: GoogleFonts.inter(color: Colors.grey)),
+                ),
+              )
+            else
+              ..._resumes.map((res) {
+                final isActive = res['is_active'] == true;
+                final id = res['id'] as String;
+                final fileName = res['file_name'] ?? 'Resume.pdf';
+                final fileSize = res['file_size'] != null ? '${((res['file_size'] as int) / 1024).toStringAsFixed(1)} KB' : '0 KB';
+                final skills = (res['parsed_skills'] as List?) ?? [];
+                final atsScore = (res['ats_score'] as num?)?.toDouble() ?? 0.0;
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 14.0),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: isActive ? AppTheme.primaryColor.withOpacity(0.12) : (isDark ? const Color(0xFF1E293B) : Colors.white),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isActive ? AppTheme.primaryColor : Colors.grey.withOpacity(0.3),
+                        width: isActive ? 2 : 1,
+                      ),
                     ),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.picture_as_pdf, color: Colors.redAccent, size: 32),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
                           children: [
-                            Row(
-                              children: [
-                                Flexible(
-                                  child: Text(
-                                    res['fileName'],
-                                    style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 14),
-                                    overflow: TextOverflow.ellipsis,
+                            const Icon(Icons.picture_as_pdf, color: Colors.redAccent, size: 32),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          fileName,
+                                          style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 14),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      if (isActive) ...[
+                                        const SizedBox(width: 8),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: Colors.green,
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          child: Text(
+                                            'ACTIVE',
+                                            style: GoogleFonts.inter(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
                                   ),
-                                ),
-                                if (isActive) ...[
-                                  const SizedBox(width: 8),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: Colors.green,
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Text(
-                                      'ACTIVE',
-                                      style: GoogleFonts.inter(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
-                                    ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Size: $fileSize • Skills Found: ${skills.length} • ATS Score: ${atsScore.toInt()}%',
+                                    style: GoogleFonts.inter(fontSize: 11, color: Colors.grey),
                                   ),
                                 ],
-                              ],
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              res['uploadedAt'],
-                              style: GoogleFonts.inter(fontSize: 11, color: Colors.grey),
+                              ),
                             ),
                           ],
                         ),
-                      ),
-                      if (!isActive)
-                        OutlinedButton(
-                          onPressed: () => _setActiveResume(res['id']),
-                          child: const Text('Set Active'),
+                        const SizedBox(height: 14),
+                        Row(
+                          children: [
+                            if (!isActive)
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryColor, foregroundColor: Colors.white),
+                                onPressed: () => _setActiveResume(id),
+                                child: const Text('Set Active'),
+                              ),
+                            const SizedBox(width: 8),
+                            OutlinedButton.icon(
+                              icon: const Icon(Icons.analytics_outlined, size: 16),
+                              label: const Text('Analyze'),
+                              onPressed: () => context.push('/ats-analysis'),
+                            ),
+                            const SizedBox(width: 8),
+                            OutlinedButton.icon(
+                              icon: const Icon(Icons.videocam_outlined, size: 16),
+                              label: const Text('Mock Interview'),
+                              onPressed: () => context.push('/interview/setup'),
+                            ),
+                            const Spacer(),
+                            IconButton(
+                              icon: const Icon(Icons.edit_outlined, size: 18),
+                              onPressed: () => _renameResume(id, fileName),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 18),
+                              onPressed: () => _deleteResume(id),
+                            ),
+                          ],
                         ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              );
-            }).toList(),
+                );
+              }).toList(),
 
             const SizedBox(height: 24),
 
-            // Active Resume Parsed Skill Summary Card (Image 5 style)
-            GlassCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.psychology_outlined, color: AppTheme.primaryColor, size: 22),
-                          const SizedBox(width: 8),
-                          Text('Parsed Skills & Projects', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold)),
-                        ],
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.purple.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(8),
+            // Active Resume Parsed Info Card
+            if (activeResume.isNotEmpty) ...[
+              GlassCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Active Profile Extracted Skills', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold)),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            'Active Resume',
+                            style: GoogleFonts.inter(color: Colors.green, fontSize: 10, fontWeight: FontWeight.bold),
+                          ),
                         ),
-                        child: Text(
-                          'NLP Extracted',
-                          style: GoogleFonts.inter(color: Colors.purpleAccent, fontSize: 10, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text('Extracted Technical Skills:', style: GoogleFonts.inter(fontSize: 12, color: Colors.grey)),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: (activeResume['parsedSkills'] as List<String>)
-                        .map((skill) => Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                              decoration: BoxDecoration(
-                                color: AppTheme.primaryColor.withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: AppTheme.primaryColor.withOpacity(0.3)),
-                              ),
-                              child: Text(skill, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold)),
-                            ))
-                        .toList(),
-                  ),
-                  const SizedBox(height: 16),
-                  Text('Extracted Resume Projects:', style: GoogleFonts.inter(fontSize: 12, color: Colors.grey)),
-                  const SizedBox(height: 6),
-                  ...(activeResume['projects'] as List<String>)
-                      .map((proj) => Padding(
-                            padding: const EdgeInsets.only(bottom: 4.0),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.code_rounded, color: AppTheme.secondaryColor, size: 16),
-                                const SizedBox(width: 8),
-                                Text(proj, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
-                              ],
-                            ),
-                          ))
-                      .toList(),
-                ],
-              ),
-            ).animate().fadeIn(delay: 200.ms, duration: 400.ms),
-
-            const SizedBox(height: 28),
-
-            // Action Buttons
-            Row(
-              children: [
-                Expanded(
-                  child: PrimaryButton(
-                    text: 'View ATS Analysis',
-                    icon: Icons.analytics_outlined,
-                    onPressed: () => context.push('/ats-analysis'),
-                  ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: ((activeResume['parsed_skills'] as List?) ?? [])
+                          .map((skill) => Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.primaryColor.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: AppTheme.primaryColor.withOpacity(0.3)),
+                                ),
+                                child: Text(skill.toString(), style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold)),
+                              ))
+                          .toList(),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: PrimaryButton(
-                    text: 'Start AI Mock Interview',
-                    icon: Icons.videocam_outlined,
-                    onPressed: () => context.push('/interview/setup'),
-                  ),
-                ),
-              ],
-            ),
+              ).animate().fadeIn(duration: 400.ms),
+            ],
           ],
         ),
       ),
