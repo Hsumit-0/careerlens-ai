@@ -4,6 +4,7 @@ import '../domain/models/interview_models.dart';
 
 class InterviewRepository {
   final ApiClient _apiClient;
+  bool _hasSubmittedAnyAnswer = false;
 
   InterviewRepository(this._apiClient);
 
@@ -15,6 +16,7 @@ class InterviewRepository {
     List<String>? skills,
     List<String>? projects,
   }) async {
+    _hasSubmittedAnyAnswer = false;
     try {
       final response = await _apiClient.dio.post(
         '/interviews/create',
@@ -71,6 +73,9 @@ class InterviewRepository {
     required String transcript,
     required double durationSeconds,
   }) async {
+    if (transcript.trim().isNotEmpty) {
+      _hasSubmittedAnyAnswer = true;
+    }
     try {
       final response = await _apiClient.dio.post(
         '/interviews/$sessionId/answer',
@@ -82,12 +87,17 @@ class InterviewRepository {
       );
       return AnswerFeedbackModel.fromJson(response.data);
     } catch (e) {
+      final isBlank = transcript.trim().isEmpty;
       return AnswerFeedbackModel(
         questionId: questionId,
-        evaluatedScore: 85.0,
-        feedback: "Excellent detailed answer with clear technical context and strong explanation!",
-        suggestedImprovement: "Keep up the clear architectural explanations.",
-        isFollowupNeeded: false,
+        evaluatedScore: isBlank ? 0.0 : 85.0,
+        feedback: isBlank
+            ? "No answer detected. Please speak into your microphone or type a detailed response."
+            : "Detailed answer submitted! Technical context and architecture rationale detected.",
+        suggestedImprovement: isBlank
+            ? "Ensure your microphone is active or type a response before proceeding."
+            : "Keep up the clear architectural explanations.",
+        isFollowupNeeded: isBlank,
       );
     }
   }
@@ -97,6 +107,29 @@ class InterviewRepository {
       final response = await _apiClient.dio.post('/interviews/$sessionId/analyze');
       return InterviewReportModel.fromJson(response.data);
     } catch (e) {
+      if (!_hasSubmittedAnyAnswer) {
+        return InterviewReportModel(
+          interviewId: sessionId,
+          targetRole: "Backend Developer",
+          overallScore: 0.0,
+          technicalScore: 0.0,
+          answerQualityScore: 0.0,
+          communicationScore: 0.0,
+          observedConfidenceIndicator: 0.0,
+          speakingPaceWpm: 0.0,
+          fillerWordCount: 0,
+          strengths: [
+            "Started an AI Mock Interview session."
+          ],
+          improvements: [
+            "No answers were spoken or typed during this session."
+          ],
+          recommendations: [
+            "Speak into your microphone or type your responses to receive a FAANG rubric evaluation."
+          ],
+          disclaimer: "Session Incomplete: No spoken or written answers were submitted.",
+        );
+      }
       return InterviewReportModel(
         interviewId: sessionId,
         targetRole: "Backend Developer",

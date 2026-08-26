@@ -23,12 +23,22 @@ class ConfidenceIndicatorService:
         technical_score: float,
         answer_quality_score: float,
         communication_score: float,
-        camera_enabled: bool = True
+        camera_enabled: bool = True,
+        is_empty_session: bool = False,
     ) -> Dict[str, Any]:
-        # Visual engagement estimate (if camera enabled)
+        if is_empty_session or (technical_score == 0.0 and answer_quality_score == 0.0):
+            return {
+                "overall_score": 0.0,
+                "technical_score": 0.0,
+                "answer_quality_score": 0.0,
+                "communication_score": 0.0,
+                "observed_confidence_indicator": 0.0,
+                "camera_engagement": 0.0,
+                "disclaimer": "Session Incomplete: No spoken or written answers were submitted.",
+            }
+
         camera_engagement = 82.0 if camera_enabled else 75.0
         
-        # Observed Communication Confidence calculation
         observed_confidence = round(
             (communication_score * 0.45) +
             (answer_quality_score * 0.35) +

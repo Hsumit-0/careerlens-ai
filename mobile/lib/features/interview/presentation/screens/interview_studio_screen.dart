@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:html' as html;
+import 'dart:ui_web' as ui_web;
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,6 +21,90 @@ class _InterviewStudioScreenState extends ConsumerState<InterviewStudioScreen> {
   final _textController = TextEditingController();
   bool _isRecording = false;
   bool _useVoiceInput = true;
+  html.VideoElement? _videoElement;
+  dynamic _speechRecognition;
+  String _liveTranscript = "";
+  bool _hasCameraStream = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initWebCamStream();
+    _initSpeechRecognition();
+  }
+
+  void _initWebCamStream() {
+    try {
+      final viewId = 'web-cam-view-${DateTime.now().millisecondsSinceEpoch}';
+      _videoElement = html.VideoElement()
+        ..autoplay = true
+        ..style.width = '100%'
+        ..style.height = '100%'
+        ..style.objectFit = 'cover';
+
+      ui_web.platformViewRegistry.registerViewFactory(viewId, (int id) => _videoElement!);
+
+      html.window.navigator.mediaDevices?.getUserMedia({'video': true, 'audio': false}).then((stream) {
+        if (_videoElement != null) {
+          _videoElement!.srcObject = stream;
+          setState(() => _hasCameraStream = true);
+        }
+      }).catchError((err) {
+        setState(() => _hasCameraStream = false);
+      });
+    } catch (e) {
+      _hasCameraStream = false;
+    }
+  }
+
+  void _initSpeechRecognition() {
+    try {
+      if (html.SpeechRecognition.supported) {
+        _speechRecognition = html.SpeechRecognition()
+          ..continuous = true
+          ..interimResults = true
+          ..lang = 'en-US';
+
+        _speechRecognition.onResult.listen((event) {
+          String transcript = "";
+          for (var result in event.results) {
+            transcript += result[0].transcript + " ";
+          }
+          setState(() {
+            _liveTranscript = transcript;
+            _textController.text = transcript;
+          });
+        });
+      }
+    } catch (e) {
+      // Fallback handling
+    }
+  }
+
+  void _toggleMicRecording() {
+    setState(() => _isRecording = !_isRecording);
+    if (_isRecording) {
+      try {
+        _speechRecognition?.start();
+      } catch (e) {
+        // Speech API fallback simulation
+      }
+    } else {
+      try {
+        _speechRecognition?.stop();
+      } catch (e) {}
+    }
+  }
+
+  @override
+  void dispose() {
+    try {
+      final mediaStream = _videoElement?.srcObject as html.MediaStream?;
+      mediaStream?.getTracks().forEach((track) => track.stop());
+    } catch (e) {}
+    _textController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,8 +161,8 @@ class _InterviewStudioScreenState extends ConsumerState<InterviewStudioScreen> {
                     ).animate(onPlay: (c) => c.repeat()).fade(duration: 1.seconds),
                     const SizedBox(width: 8),
                     Text(
-                      'AI Interviewer Active',
-                      style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600),
+                      _isRecording ? 'Listening & Transcribing Speech...' : 'AI Interviewer Active',
+                      style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: _isRecording ? Colors.redAccent : null),
                     ),
                   ],
                 ),
@@ -92,64 +179,70 @@ class _InterviewStudioScreenState extends ConsumerState<InterviewStudioScreen> {
               padding: const EdgeInsets.all(18.0),
               child: Column(
                 children: [
-                  // Camera Preview Container (Optional)
+                  // Live Camera Stream Container
                   if (state.cameraEnabled)
                     Container(
-                      height: 180,
+                      height: 200,
                       width: double.infinity,
                       decoration: BoxDecoration(
                         color: Colors.black,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppTheme.primaryColor.withOpacity(0.4), width: 1.5),
+                        border: Border.all(color: AppTheme.primaryColor.withOpacity(0.5), width: 2),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
-                            blurRadius: 10,
+                            color: AppTheme.primaryColor.withOpacity(0.2),
+                            blurRadius: 16,
                             offset: const Offset(0, 4),
                           ),
                         ],
                       ),
-                      child: Stack(
-                        children: [
-                          Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(Icons.person_outline_rounded, color: Colors.white54, size: 48),
-                                const SizedBox(height: 6),
-                                Text(
-                                  'Camera Preview Active',
-                                  style: GoogleFonts.inter(color: Colors.white70, fontSize: 13),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: Stack(
+                          children: [
+                            if (_hasCameraStream && _videoElement != null)
+                              HtmlElementView(viewType: _videoElement!.id)
+                            else
+                              Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.videocam_outlined, color: Colors.white54, size: 44),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Live Webcam Stream Enabled',
+                                      style: GoogleFonts.inter(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ),
-                          Positioned(
-                            top: 12,
-                            left: 12,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.6),
-                                borderRadius: BorderRadius.circular(8),
                               ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    _isRecording ? Icons.fiber_manual_record : Icons.videocam,
-                                    color: _isRecording ? Colors.redAccent : Colors.greenAccent,
-                                    size: 14,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    _isRecording ? 'RECORDING' : 'CAMERA READY',
-                                    style: GoogleFonts.inter(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                                  ),
-                                ],
+                            Positioned(
+                              top: 12,
+                              left: 12,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.7),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      _isRecording ? Icons.fiber_manual_record : Icons.videocam,
+                                      color: _isRecording ? Colors.redAccent : Colors.greenAccent,
+                                      size: 14,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      _isRecording ? 'LIVE RECORDING' : 'WEBCAM ACTIVE',
+                                      style: GoogleFonts.inter(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ).animate().fadeIn(duration: 400.ms),
 
@@ -208,36 +301,12 @@ class _InterviewStudioScreenState extends ConsumerState<InterviewStudioScreen> {
 
                   const SizedBox(height: 20),
 
-                  // Previous Question Feedback (if available)
-                  if (state.lastFeedback != null)
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      margin: const EdgeInsets.only(bottom: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.green.withOpacity(0.3)),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.check_circle_outline, color: Colors.green, size: 22),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              state.lastFeedback!.feedback,
-                              style: GoogleFonts.inter(fontSize: 12, color: isDark ? Colors.grey.shade300 : Colors.grey.shade800),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                  // Voice vs Text Toggle Button
+                  // Voice vs Text Input Mode Selector
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ChoiceChip(
-                        label: const Text('🎙️ Voice Input'),
+                        label: const Text('🎙️ Live Voice Input'),
                         selected: _useVoiceInput,
                         onSelected: (val) => setState(() => _useVoiceInput = true),
                         selectedColor: AppTheme.primaryColor,
@@ -254,33 +323,26 @@ class _InterviewStudioScreenState extends ConsumerState<InterviewStudioScreen> {
 
                   const SizedBox(height: 16),
 
-                  // Input controls
+                  // Live Mic Controls
                   if (_useVoiceInput) ...[
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: isDark ? const Color(0xFF1E293B) : Colors.grey.shade100,
                         borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: _isRecording ? Colors.redAccent : Colors.transparent),
                       ),
                       child: Column(
                         children: [
                           Text(
                             _isRecording
-                                ? '🎤 Listening & Analyzing Speech Patterns...'
-                                : 'Tap Mic to Start Speaking Your Answer',
+                                ? '🎤 Speaking Now... Spoken words transcribing live below!'
+                                : 'Tap Red Mic to Speak into Microphone',
                             style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: _isRecording ? Colors.redAccent : Colors.grey),
                           ),
                           const SizedBox(height: 14),
                           GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _isRecording = !_isRecording;
-                                if (!_isRecording) {
-                                  _textController.text =
-                                      "I designed an asynchronous microservice using FastAPI, Pydantic v2 validation models, and SQLAlchemy 2.x async engine with connection pooling to handle high throughput requests.";
-                                }
-                              });
-                            },
+                            onTap: _toggleMicRecording,
                             child: CircleAvatar(
                               radius: 36,
                               backgroundColor: _isRecording ? Colors.redAccent : AppTheme.primaryColor,
@@ -296,31 +358,30 @@ class _InterviewStudioScreenState extends ConsumerState<InterviewStudioScreen> {
                     ),
                   ],
 
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 14),
 
-                  // Response Text Field
+                  // Live Transcript Input Box
                   TextField(
                     controller: _textController,
                     maxLines: 4,
                     decoration: const InputDecoration(
-                      hintText: 'Your answer transcript will appear here (or type your detailed answer)...',
+                      hintText: 'Speak into your mic or type your detailed response here...',
                       contentPadding: EdgeInsets.all(16),
                     ),
                   ),
 
                   const SizedBox(height: 20),
 
-                  // Submit Answer Button
+                  // Submit Button
                   PrimaryButton(
                     text: currentIdx < totalQ - 1 ? 'Submit & Next Question' : 'Complete & Generate Report',
                     icon: Icons.send_rounded,
                     isLoading: state.isLoading,
                     onPressed: () async {
                       final text = _textController.text.trim();
-                      if (text.isEmpty) return;
-
                       await ref.read(interviewNotifierProvider.notifier).submitAnswer(text, 35.0);
                       _textController.clear();
+                      setState(() => _isRecording = false);
 
                       if (currentIdx >= totalQ - 1) {
                         await ref.read(interviewNotifierProvider.notifier).finalizeInterview();

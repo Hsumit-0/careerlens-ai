@@ -11,22 +11,33 @@ class AnswerEvaluator:
         words = transcript.strip().split()
         word_count = len(words)
         
-        # Base quality assessment based on answer depth and key technical terms
+        # Zero score for blank/empty responses
+        if word_count == 0:
+            return {
+                "score": 0.0,
+                "word_count": 0,
+                "feedback": "No answer detected. You did not speak or type a response for this question.",
+                "suggested_improvement": "Ensure your microphone is active or type a response before proceeding.",
+                "is_followup_needed": True,
+                "followup_question": "Would you like to try answering this question again?",
+            }
+
+        # Quality assessment based on answer depth and key technical terms
         if word_count < 10:
-            score = 50.0
+            score = 40.0
             feedback = "Your answer was very brief. Try adding specific examples, architecture details, and technical rationale."
             improvement = "Elaborate further using concrete technical details and the STAR method (Situation, Task, Action, Result)."
             needs_followup = True
             followup = "Can you provide a more detailed step-by-step technical explanation with a concrete example?"
         elif word_count < 18:
-            score = 75.0
-            feedback = "Solid answer covering the primary points, though further technical depth would strengthen it."
+            score = 72.0
+            feedback = "Solid answer covering primary concepts, though further technical depth would strengthen it."
             improvement = "Mention specific tools, libraries, benchmarks, or design trade-offs to make your answer stand out."
             needs_followup = False
             followup = None
         else:
             score = 88.0
-            feedback = "Excellent answer with strong detail, clear technical context, and effective structure!"
+            feedback = "Excellent answer with strong technical depth, clear context, and effective structure!"
             improvement = "Keep up the detailed explanations while maintaining a concise and direct delivery."
             needs_followup = False
             followup = None
