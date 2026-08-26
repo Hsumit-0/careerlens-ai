@@ -33,7 +33,6 @@ class _ResumeUploadScreenState extends State<ResumeUploadScreen> {
         setState(() {
           _isUploading = false;
           final newId = 'res-${_resumes.length + 1}';
-          // Deactivate previous active resumes
           for (var r in _resumes) {
             r['isActive'] = false;
           }
@@ -68,7 +67,7 @@ class _ResumeUploadScreenState extends State<ResumeUploadScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final activeResume = _resumes.firstWhere((r) => r['isActive'] == true, ORElse: () => _resumes.first);
+    final activeResume = _resumes.firstWhere((r) => r['isActive'] == true, orElse: () => _resumes.first);
 
     return Scaffold(
       appBar: AppBar(

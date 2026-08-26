@@ -22,6 +22,7 @@ class _InterviewStudioScreenState extends ConsumerState<InterviewStudioScreen> {
   bool _isRecording = false;
   bool _useVoiceInput = true;
   html.VideoElement? _videoElement;
+  String _viewId = '';
   dynamic _speechRecognition;
   String _liveTranscript = "";
   bool _hasCameraStream = false;
@@ -35,18 +36,28 @@ class _InterviewStudioScreenState extends ConsumerState<InterviewStudioScreen> {
 
   void _initWebCamStream() {
     try {
-      final viewId = 'web-cam-view-${DateTime.now().millisecondsSinceEpoch}';
+      _viewId = 'web-cam-view-${DateTime.now().millisecondsSinceEpoch}';
       _videoElement = html.VideoElement()
         ..autoplay = true
+        ..muted = true // Crucial for Chrome autoplay policy
         ..style.width = '100%'
         ..style.height = '100%'
-        ..style.objectFit = 'cover';
+        ..style.objectFit = 'cover'
+        ..setAttribute('playsinline', 'true');
 
-      ui_web.platformViewRegistry.registerViewFactory(viewId, (int id) => _videoElement!);
+      ui_web.platformViewRegistry.registerViewFactory(_viewId, (int id) => _videoElement!);
 
-      html.window.navigator.mediaDevices?.getUserMedia({'video': true, 'audio': false}).then((stream) {
+      html.window.navigator.mediaDevices?.getUserMedia({
+        'video': {
+          'width': {'ideal': 1280},
+          'height': {'ideal': 720},
+          'facingMode': 'user'
+        },
+        'audio': false
+      }).then((stream) {
         if (_videoElement != null) {
           _videoElement!.srcObject = stream;
+          _videoElement!.play(); // Forces immediate video playback
           setState(() => _hasCameraStream = true);
         }
       }).catchError((err) {
@@ -76,9 +87,7 @@ class _InterviewStudioScreenState extends ConsumerState<InterviewStudioScreen> {
           });
         });
       }
-    } catch (e) {
-      // Fallback handling
-    }
+    } catch (e) {}
   }
 
   void _toggleMicRecording() {
@@ -86,9 +95,7 @@ class _InterviewStudioScreenState extends ConsumerState<InterviewStudioScreen> {
     if (_isRecording) {
       try {
         _speechRecognition?.start();
-      } catch (e) {
-        // Speech API fallback simulation
-      }
+      } catch (e) {}
     } else {
       try {
         _speechRecognition?.stop();
@@ -142,7 +149,7 @@ class _InterviewStudioScreenState extends ConsumerState<InterviewStudioScreen> {
       ),
       body: Column(
         children: [
-          // Interview Progress & AI Status Banner
+          // Banner
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             color: isDark ? const Color(0xFF1E293B) : Colors.indigo.shade50,
@@ -161,7 +168,7 @@ class _InterviewStudioScreenState extends ConsumerState<InterviewStudioScreen> {
                     ).animate(onPlay: (c) => c.repeat()).fade(duration: 1.seconds),
                     const SizedBox(width: 8),
                     Text(
-                      _isRecording ? 'Listening & Transcribing Speech...' : 'AI Interviewer Active',
+                      _isRecording ? 'Listening to your voice...' : 'AI Interviewer Active',
                       style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: _isRecording ? Colors.redAccent : null),
                     ),
                   ],
@@ -179,15 +186,15 @@ class _InterviewStudioScreenState extends ConsumerState<InterviewStudioScreen> {
               padding: const EdgeInsets.all(18.0),
               child: Column(
                 children: [
-                  // Live Camera Stream Container
+                  // Live Camera Stream Box with explicit play() & HTML view
                   if (state.cameraEnabled)
                     Container(
-                      height: 200,
+                      height: 220,
                       width: double.infinity,
                       decoration: BoxDecoration(
                         color: Colors.black,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppTheme.primaryColor.withOpacity(0.5), width: 2),
+                        border: Border.all(color: AppTheme.primaryColor.withOpacity(0.6), width: 2),
                         boxShadow: [
                           BoxShadow(
                             color: AppTheme.primaryColor.withOpacity(0.2),
@@ -200,8 +207,8 @@ class _InterviewStudioScreenState extends ConsumerState<InterviewStudioScreen> {
                         borderRadius: BorderRadius.circular(14),
                         child: Stack(
                           children: [
-                            if (_hasCameraStream && _videoElement != null)
-                              HtmlElementView(viewType: _videoElement!.id)
+                            if (_viewId.isNotEmpty)
+                              HtmlElementView(viewType: _viewId)
                             else
                               Center(
                                 child: Column(
@@ -210,7 +217,7 @@ class _InterviewStudioScreenState extends ConsumerState<InterviewStudioScreen> {
                                     const Icon(Icons.videocam_outlined, color: Colors.white54, size: 44),
                                     const SizedBox(height: 8),
                                     Text(
-                                      'Live Webcam Stream Enabled',
+                                      'Connecting Live Camera Feed...',
                                       style: GoogleFonts.inter(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold),
                                     ),
                                   ],
@@ -222,7 +229,7 @@ class _InterviewStudioScreenState extends ConsumerState<InterviewStudioScreen> {
                               child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.7),
+                                  color: Colors.black.withOpacity(0.75),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Row(
@@ -234,7 +241,7 @@ class _InterviewStudioScreenState extends ConsumerState<InterviewStudioScreen> {
                                     ),
                                     const SizedBox(width: 6),
                                     Text(
-                                      _isRecording ? 'LIVE RECORDING' : 'WEBCAM ACTIVE',
+                                      _isRecording ? 'LIVE RECORDING' : 'WEBCAM STREAM LIVE',
                                       style: GoogleFonts.inter(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
                                     ),
                                   ],
@@ -255,13 +262,6 @@ class _InterviewStudioScreenState extends ConsumerState<InterviewStudioScreen> {
                     decoration: BoxDecoration(
                       gradient: AppTheme.darkCardGradient,
                       borderRadius: BorderRadius.circular(18),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppTheme.primaryColor.withOpacity(0.15),
-                          blurRadius: 16,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -323,49 +323,60 @@ class _InterviewStudioScreenState extends ConsumerState<InterviewStudioScreen> {
 
                   const SizedBox(height: 16),
 
-                  // Live Mic Controls
+                  // LARGE PROMINENT UN-MISSABLE MICROPHONE RECORD BUTTON
                   if (_useVoiceInput) ...[
                     Container(
-                      padding: const EdgeInsets.all(16),
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF1E293B) : Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: _isRecording ? Colors.redAccent : Colors.transparent),
+                        color: _isRecording ? Colors.red.withOpacity(0.15) : (isDark ? const Color(0xFF1E293B) : Colors.indigo.shade50),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: _isRecording ? Colors.redAccent : AppTheme.primaryColor.withOpacity(0.4),
+                          width: 2,
+                        ),
                       ),
                       child: Column(
                         children: [
                           Text(
                             _isRecording
-                                ? '🎤 Speaking Now... Spoken words transcribing live below!'
-                                : 'Tap Red Mic to Speak into Microphone',
-                            style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: _isRecording ? Colors.redAccent : Colors.grey),
+                                ? '🔴 RECORDING LIVE... Speak your answer now!'
+                                : 'Tap the big Red Button below to start speaking your answer:',
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: _isRecording ? Colors.redAccent : (isDark ? Colors.white : Colors.indigo.shade900),
+                            ),
                           ),
-                          const SizedBox(height: 14),
-                          GestureDetector(
-                            onTap: _toggleMicRecording,
-                            child: CircleAvatar(
-                              radius: 36,
-                              backgroundColor: _isRecording ? Colors.redAccent : AppTheme.primaryColor,
-                              child: Icon(
-                                _isRecording ? Icons.mic : Icons.mic_none_rounded,
-                                color: Colors.white,
-                                size: 36,
-                              ),
-                            ).animate(target: _isRecording ? 1 : 0).scale(duration: 300.ms),
-                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _isRecording ? Colors.redAccent : const Color(0xFFEF4444),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                              elevation: 8,
+                            ),
+                            icon: Icon(_isRecording ? Icons.stop_circle_rounded : Icons.mic_rounded, size: 30),
+                            label: Text(
+                              _isRecording ? 'TAP TO STOP RECORDING' : '🎙️ TAP HERE TO RECORD YOUR VOICE',
+                              style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.bold),
+                            ),
+                            onPressed: _toggleMicRecording,
+                          ).animate(target: _isRecording ? 1 : 0).scale(duration: 300.ms),
                         ],
                       ),
                     ),
                   ],
 
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 16),
 
-                  // Live Transcript Input Box
+                  // Spoken / Written Response Box
                   TextField(
                     controller: _textController,
                     maxLines: 4,
                     decoration: const InputDecoration(
-                      hintText: 'Speak into your mic or type your detailed response here...',
+                      hintText: 'Spoken speech or typed response will appear here...',
                       contentPadding: EdgeInsets.all(16),
                     ),
                   ),
