@@ -1,15 +1,17 @@
 import streamlit as st
 
 def render_sidebar_auth():
-    """Renders sleek Login / Register / Logout user authentication widget in the sidebar with explicit high-contrast styling."""
+    """Renders sleek Login / Register / Logout user authentication widget in the sidebar with explicit high-contrast styling and modern fonts."""
     
-    # Inject CSS for Sidebar High Contrast
     st.markdown("""
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap');
+
         /* Force Dark Navy Sidebar with Crisp White Text */
         [data-testid="stSidebar"] {
             background-color: #0f172a !important;
             border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
+            font-family: 'Inter', sans-serif !important;
         }
         [data-testid="stSidebar"] p,
         [data-testid="stSidebar"] span,
@@ -21,18 +23,22 @@ def render_sidebar_auth():
         [data-testid="stSidebar"] div,
         [data-testid="stSidebar"] .stMarkdown {
             color: #f8fafc !important;
+            font-family: 'Inter', sans-serif !important;
         }
         [data-testid="stSidebar"] input {
             background-color: #1e293b !important;
             color: #ffffff !important;
             border: 1px solid #475569 !important;
             border-radius: 6px !important;
+            font-family: 'Inter', sans-serif !important;
         }
         [data-testid="stSidebar"] button {
             background: linear-gradient(90deg, #2563eb 0%, #7c3aed 100%) !important;
             color: #ffffff !important;
             border-radius: 8px !important;
             border: none !important;
+            font-family: 'Outfit', sans-serif !important;
+            font-weight: 700 !important;
         }
         [data-testid="stSidebar"] button p, [data-testid="stSidebar"] button span {
             color: #ffffff !important;

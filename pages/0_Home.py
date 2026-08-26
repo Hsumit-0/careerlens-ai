@@ -4,18 +4,24 @@ import streamlit as st
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from auth_widget import render_sidebar_auth
-
 st.markdown("""
 <style>
-    /* Main Background */
-    .stApp {
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap');
+
+    html, body, [class*="css"], .stApp {
+        font-family: 'Inter', sans-serif !important;
         background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
         color: #f8fafc !important;
     }
-    p, span, label, div, h1, h2, h3, h4, h5, h6,
+    p, span, label, div,
     .stMarkdown, .stText, [data-testid="stWidgetLabel"] p {
         color: #f8fafc !important;
+        font-family: 'Inter', sans-serif !important;
+    }
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Outfit', sans-serif !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
     }
 
     /* Force Dark Navy Sidebar with High Contrast White Text */
@@ -40,16 +46,6 @@ st.markdown("""
         border: 1px solid #475569 !important;
         border-radius: 6px !important;
     }
-    [data-testid="stSidebar"] button {
-        background: linear-gradient(90deg, #2563eb 0%, #7c3aed 100%) !important;
-        color: #ffffff !important;
-        border-radius: 8px !important;
-        border: none !important;
-    }
-    [data-testid="stSidebar"] button p, [data-testid="stSidebar"] button span {
-        color: #ffffff !important;
-        font-weight: 700 !important;
-    }
 
     /* Banner Container */
     .header-box {
@@ -65,6 +61,7 @@ st.markdown("""
         background: linear-gradient(90deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        font-family: 'Outfit', sans-serif !important;
         font-size: 2.8rem;
         font-weight: 800;
         margin-bottom: 6px;
@@ -82,6 +79,7 @@ st.markdown("""
     .stButton > button {
         background: linear-gradient(90deg, #2563eb 0%, #7c3aed 100%) !important;
         color: #ffffff !important;
+        font-family: 'Outfit', sans-serif !important;
         font-weight: 700 !important;
         border-radius: 10px !important;
         padding: 12px 24px !important;
