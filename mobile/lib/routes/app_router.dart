@@ -9,6 +9,8 @@ import '../features/dashboard/presentation/screens/placeholder_dashboard.dart';
 import '../features/interview/presentation/screens/interview_setup_screen.dart';
 import '../features/interview/presentation/screens/interview_studio_screen.dart';
 import '../features/interview/presentation/screens/interview_report_screen.dart';
+import '../features/resume/presentation/screens/ats_analysis_screen.dart';
+import '../features/roadmap/presentation/screens/career_navigator_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authNotifierProvider);
@@ -31,6 +33,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/dashboard',
         builder: (context, state) => const PlaceholderDashboard(),
+      ),
+      GoRoute(
+        path: '/ats-analysis',
+        builder: (context, state) => const AtsAnalysisScreen(),
+      ),
+      GoRoute(
+        path: '/career-navigator',
+        builder: (context, state) => const CareerNavigatorScreen(),
       ),
       GoRoute(
         path: '/interview/setup',

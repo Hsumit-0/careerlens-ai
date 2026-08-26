@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/custom_widgets.dart';
+import '../../../../core/widgets/camera_permission_modal.dart';
 import '../../providers/interview_provider.dart';
 
 class InterviewSetupScreen extends ConsumerStatefulWidget {
@@ -163,7 +164,7 @@ class _InterviewSetupScreenState extends ConsumerState<InterviewSetupScreen> {
 
             const SizedBox(height: 20),
 
-            // Hardware Toggles
+            // Hardware Toggles with Explicit Permission Dialog Trigger
             GlassCard(
               child: Column(
                 children: [
@@ -171,7 +172,17 @@ class _InterviewSetupScreenState extends ConsumerState<InterviewSetupScreen> {
                     title: Text('Enable Camera Preview', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600)),
                     subtitle: Text('Allows visual engagement feedback (strictly optional & private)', style: GoogleFonts.inter(fontSize: 11, color: Colors.grey)),
                     value: state.cameraEnabled,
-                    onChanged: (_) => ref.read(interviewNotifierProvider.notifier).toggleCamera(),
+                    onChanged: (val) {
+                      if (val) {
+                        CameraPermissionModal.show(
+                          context,
+                          onPermissionGranted: () => ref.read(interviewNotifierProvider.notifier).toggleCamera(),
+                          onPermissionDenied: () {},
+                        );
+                      } else {
+                        ref.read(interviewNotifierProvider.notifier).toggleCamera();
+                      }
+                    },
                     activeColor: AppTheme.primaryColor,
                   ),
                   const Divider(height: 1),
