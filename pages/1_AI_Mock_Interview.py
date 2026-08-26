@@ -5,9 +5,10 @@ import time
 import streamlit as st
 import streamlit.components.v1 as components
 
-# Add workspace paths
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "backend"))
+
+from auth_widget import render_sidebar_auth
 
 try:
     from app.interview.question_generator import QuestionGenerator
@@ -24,7 +25,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom High-Contrast CSS
+render_sidebar_auth()
+
 st.markdown("""
 <style>
     .stApp {
@@ -63,8 +65,7 @@ st.markdown("""
 if "generated_questions" not in st.session_state:
     st.session_state["generated_questions"] = []
 
-# Quick Navigation back to Home
-st.page_link("streamlit_app.py", label="🏠 Back to Overview Dashboard")
+st.page_link("streamlit_app.py", label="Home Overview Dashboard", icon="🏠")
 
 st.markdown("# 🎯 Live AI Mock Interview Practice")
 st.caption("Practice mock interviews with simultaneous video camera stream and real-time microphone speech-to-text transcription.")

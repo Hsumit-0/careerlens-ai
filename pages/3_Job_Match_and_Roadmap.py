@@ -4,11 +4,16 @@ import streamlit as st
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from auth_widget import render_sidebar_auth
+
 st.set_page_config(
     page_title="Job Match & Roadmap - CareerLens AI",
     page_icon="📊",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
+
+render_sidebar_auth()
 
 st.markdown("""
 <style>
@@ -40,6 +45,8 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
+
+st.page_link("streamlit_app.py", label="Home Overview Dashboard", icon="🏠")
 
 st.markdown("# 📊 Granular Job Compatibility & Learning Roadmap")
 st.caption("Match your candidate profile against target job descriptions to identify skill gaps and generate a 4-week learning roadmap.")

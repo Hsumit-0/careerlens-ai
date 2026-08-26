@@ -4,11 +4,16 @@ import streamlit as st
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from auth_widget import render_sidebar_auth
+
 st.set_page_config(
     page_title="AI Career Coach - CareerLens AI",
     page_icon="💬",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
+
+render_sidebar_auth()
 
 st.markdown("""
 <style>
@@ -35,6 +40,8 @@ if "chat_history" not in st.session_state:
     st.session_state["chat_history"] = [
         {"role": "assistant", "content": "Hello! I am your AI Career Coach. How can I help you with your career goals, resume strategy, or interview preparation today?"}
     ]
+
+st.page_link("streamlit_app.py", label="Home Overview Dashboard", icon="🏠")
 
 st.markdown("# 💬 Grounded AI Career Guidance Coach")
 st.caption("Ask questions about career strategy, interview preparation, salary negotiation, or technical growth.")

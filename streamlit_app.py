@@ -4,12 +4,16 @@ import streamlit as st
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from auth_widget import render_sidebar_auth
+
 st.set_page_config(
     page_title="CareerLens AI - Personal Career Intelligence",
     page_icon="🔍",
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+render_sidebar_auth()
 
 st.markdown("""
 <style>
@@ -46,8 +50,6 @@ st.markdown("""
         padding: 24px;
         margin-bottom: 16px;
     }
-    
-    /* Style Page Link Buttons */
     [data-testid="stPageLink-NavLink"] {
         background: linear-gradient(90deg, #2563eb 0%, #7c3aed 100%) !important;
         color: #ffffff !important;
@@ -67,7 +69,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Main Header Banner
 st.markdown("""
 <div class="header-box">
     <div class="title-gradient">🔍 CareerLens AI</div>
@@ -77,8 +78,11 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+if st.session_state.get("user_authenticated"):
+    st.success(f"👋 Welcome back, **{st.session_state['user_name']}** ({st.session_state['user_email']})!")
+
 st.markdown("## 🚀 Explore CareerLens AI Modules")
-st.caption("Click any button below or select from the left sidebar menu to open the page directly:")
+st.caption("Click any button below or select from the left sidebar menu to open a module:")
 
 col1, col2 = st.columns(2)
 
@@ -89,7 +93,7 @@ with col1:
         <p style="color: #cbd5e1;">Live WebCam video stream and real-time speech-to-text microphone transcription with instant STAR framework scoring, WPM pace, and filler word detection.</p>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/1_🎯_AI_Mock_Interview.py", label="🚀 Launch AI Mock Interview Practice", use_container_width=True)
+    st.page_link("pages/1_AI_Mock_Interview.py", label="Launch AI Mock Interview Practice", icon="🎯", use_container_width=True)
 
     st.markdown("""
     <div class="glass-card" style="margin-top: 24px;">
@@ -97,7 +101,7 @@ with col1:
         <p style="color: #cbd5e1;">Upload PDF resumes to extract technical skills, domain strengths, and profile readiness.</p>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/2_📄_Resume_Analyzer.py", label="📄 Open Resume Analyzer", use_container_width=True)
+    st.page_link("pages/2_Resume_Analyzer.py", label="Open Resume Analyzer", icon="📄", use_container_width=True)
 
 with col2:
     st.markdown("""
@@ -106,7 +110,7 @@ with col2:
         <p style="color: #cbd5e1;">Compare your candidate profile against target job descriptions, calculate match score %, and generate a 4-week learning roadmap.</p>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/3_📊_Job_Match_and_Roadmap.py", label="📊 Open Job Compatibility & Roadmap", use_container_width=True)
+    st.page_link("pages/3_Job_Match_and_Roadmap.py", label="Open Job Compatibility & Roadmap", icon="📊", use_container_width=True)
 
     st.markdown("""
     <div class="glass-card" style="margin-top: 24px;">
@@ -114,4 +118,4 @@ with col2:
         <p style="color: #cbd5e1;">Interactive conversational AI assistant providing grounded career advice, interview strategy, and ATS resume tips.</p>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/4_💬_AI_Career_Coach.py", label="💬 Chat with AI Career Coach", use_container_width=True)
+    st.page_link("pages/4_AI_Career_Coach.py", label="Chat with AI Career Coach", icon="💬", use_container_width=True)
