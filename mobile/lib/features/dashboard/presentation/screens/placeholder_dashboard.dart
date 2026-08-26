@@ -37,6 +37,11 @@ class PlaceholderDashboard extends ConsumerWidget {
         ),
         actions: [
           IconButton(
+            icon: const Icon(Icons.upload_file_outlined),
+            tooltip: 'Upload / Manage Resumes',
+            onPressed: () => context.push('/resume-upload'),
+          ),
+          IconButton(
             icon: const Icon(Icons.analytics_outlined),
             tooltip: 'ATS Resume Analysis',
             onPressed: () => context.push('/ats-analysis'),
@@ -60,7 +65,7 @@ class PlaceholderDashboard extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Welcome Header Banner (Image 1 inspired)
+            // Welcome Header Banner
             GlassCard(
               child: Row(
                 children: [
@@ -98,16 +103,15 @@ class PlaceholderDashboard extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                    decoration: BoxDecoration(
-                      gradient: AppTheme.primaryGradient,
-                      borderRadius: BorderRadius.circular(12),
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     ),
-                    child: Text(
-                      'Upgrade to PRO',
-                      style: GoogleFonts.inter(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
-                    ),
+                    icon: const Icon(Icons.upload_file_outlined, size: 18),
+                    label: const Text('Upload Resume'),
+                    onPressed: () => context.push('/resume-upload'),
                   ),
                 ],
               ),
@@ -176,7 +180,7 @@ class PlaceholderDashboard extends ConsumerWidget {
 
             const SizedBox(height: 24),
 
-            // Executive Metric 4-Grid (Image 1 matching)
+            // Executive Metric 4-Grid
             GridView.count(
               crossAxisCount: 2,
               shrinkWrap: true,
@@ -223,7 +227,7 @@ class PlaceholderDashboard extends ConsumerWidget {
 
             const SizedBox(height: 24),
 
-            // Top Recommendations & Career Goals Section (Image 1 & Image 4 matching)
+            // Top Recommendations & Career Goals Section
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

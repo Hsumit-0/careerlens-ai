@@ -10,6 +10,7 @@ import '../features/interview/presentation/screens/interview_setup_screen.dart';
 import '../features/interview/presentation/screens/interview_studio_screen.dart';
 import '../features/interview/presentation/screens/interview_report_screen.dart';
 import '../features/resume/presentation/screens/ats_analysis_screen.dart';
+import '../features/resume/presentation/screens/resume_upload_screen.dart';
 import '../features/roadmap/presentation/screens/career_navigator_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -33,6 +34,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/dashboard',
         builder: (context, state) => const PlaceholderDashboard(),
+      ),
+      GoRoute(
+        path: '/resume-upload',
+        builder: (context, state) => const ResumeUploadScreen(),
       ),
       GoRoute(
         path: '/ats-analysis',
