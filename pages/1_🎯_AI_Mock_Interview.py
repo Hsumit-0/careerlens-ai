@@ -13,14 +13,15 @@ try:
     from app.interview.question_generator import QuestionGenerator
     from app.interview.answer_evaluator import AnswerEvaluator
     from app.speech.transcript_analyzer import TranscriptAnalyzer
-    BACKEND_MODULES_AVAILABLE = True
+    MODULES_READY = True
 except Exception:
-    BACKEND_MODULES_AVAILABLE = False
+    MODULES_READY = False
 
 st.set_page_config(
     page_title="AI Mock Interview - CareerLens AI",
     page_icon="🎯",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
 # Custom High-Contrast CSS
@@ -61,6 +62,9 @@ st.markdown("""
 
 if "generated_questions" not in st.session_state:
     st.session_state["generated_questions"] = []
+
+# Quick Navigation back to Home
+st.page_link("streamlit_app.py", label="🏠 Back to Overview Dashboard")
 
 st.markdown("# 🎯 Live AI Mock Interview Practice")
 st.caption("Practice mock interviews with simultaneous video camera stream and real-time microphone speech-to-text transcription.")
@@ -108,7 +112,7 @@ with col_setup2:
         }
         mode_val = mode_enum_map.get(interview_mode, "quick_practice")
         
-        if BACKEND_MODULES_AVAILABLE:
+        if MODULES_READY:
             st.session_state["generated_questions"] = QuestionGenerator.generate_questions(
                 target_role=target_role,
                 interview_type=mode_val,
@@ -171,7 +175,7 @@ with col_setup2:
         st.markdown("### 🎥 Simultaneous Live Camera & Real-Time Speech-to-Text")
         st.caption("Your camera stream and microphone operate simultaneously. Speak directly into your mic while looking at the camera, and your words will appear live below.")
         
-        # HTML5 WebRTC Media + Web Speech API Component (Camera + Mic Speech-to-Text working simultaneously!)
+        # HTML5 WebRTC Media + Web Speech API Component
         speech_component_html = """
         <!DOCTYPE html>
         <html>
@@ -286,7 +290,6 @@ with col_setup2:
                 let fullTranscript = '';
 
                 async function startCameraAndSpeech() {
-                    // 1. Start WebCam Video Stream
                     try {
                         mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                         document.getElementById('webcam').srcObject = mediaStream;
@@ -294,7 +297,6 @@ with col_setup2:
                         console.error('Camera/Mic permission error:', err);
                     }
 
-                    // 2. Start Web Speech API Speech Recognition
                     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
                     if (!SpeechRecognition) {
                         document.getElementById('transcript').innerText = "Speech recognition is not supported in this browser. Please use Chrome, Edge, or Safari.";
@@ -329,7 +331,7 @@ with col_setup2:
 
                     recognition.onend = function() {
                         if (isListening) {
-                            recognition.start(); // Auto restart if continuous
+                            recognition.start();
                         }
                     };
 
@@ -369,7 +371,7 @@ with col_setup2:
             if not answer_text.strip():
                 st.warning("Please record or type an answer before evaluating.")
             else:
-                if BACKEND_MODULES_AVAILABLE:
+                if MODULES_READY:
                     eval_res = AnswerEvaluator.evaluate_answer(current_q['question_text'], answer_text, spoken_duration)
                     speech_res = TranscriptAnalyzer.analyze_transcript(answer_text, spoken_duration)
                 else:

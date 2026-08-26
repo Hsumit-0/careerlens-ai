@@ -44,47 +44,74 @@ st.markdown("""
         border: 1px solid rgba(255, 255, 255, 0.12);
         border-radius: 14px;
         padding: 24px;
-        margin-bottom: 20px;
-        transition: transform 0.2s ease;
+        margin-bottom: 16px;
+    }
+    
+    /* Style Page Link Buttons */
+    [data-testid="stPageLink-NavLink"] {
+        background: linear-gradient(90deg, #2563eb 0%, #7c3aed 100%) !important;
+        color: #ffffff !important;
+        border-radius: 10px !important;
+        padding: 12px 20px !important;
+        font-weight: 700 !important;
+        font-size: 1.05rem !important;
+        text-align: center !important;
+        margin-top: 10px !important;
+        border: 1px solid #60a5fa !important;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
+    }
+    [data-testid="stPageLink-NavLink"] p, [data-testid="stPageLink-NavLink"] span {
+        color: #ffffff !important;
+        font-weight: 700 !important;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Main Banner
+# Main Header Banner
 st.markdown("""
 <div class="header-box">
     <div class="title-gradient">🔍 CareerLens AI</div>
     <div style="color: #cbd5e1; font-size: 1.25rem; font-weight: 500; margin-top: 8px;">
-        An Explainable and Fair Agentic AI System for Personalized Career Intelligence & Live Mock Interviews
+        An Explainable and Fair Agentic AI System for Personal Career Intelligence & Live AI Mock Interviews
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown("## 👈 Select a Module from the Sidebar Menu")
-st.caption("Use the sidebar on the left to navigate to any dedicated feature page:")
+st.markdown("## 🚀 Explore CareerLens AI Modules")
+st.caption("Click any button below or select from the left sidebar menu to open the page directly:")
 
-c1, c2 = st.columns(2)
+col1, col2 = st.columns(2)
 
-with c1:
+with col1:
     st.markdown("""
     <div class="glass-card">
         <h3>🎯 1. AI Mock Interview Practice</h3>
         <p style="color: #cbd5e1;">Live WebCam video stream and real-time speech-to-text microphone transcription with instant STAR framework scoring, WPM pace, and filler word detection.</p>
     </div>
-    <div class="glass-card">
+    """, unsafe_allow_html=True)
+    st.page_link("pages/1_🎯_AI_Mock_Interview.py", label="🚀 Launch AI Mock Interview Practice", use_container_width=True)
+
+    st.markdown("""
+    <div class="glass-card" style="margin-top: 24px;">
         <h3>📄 2. Resume PDF Analyzer</h3>
         <p style="color: #cbd5e1;">Upload PDF resumes to extract technical skills, domain strengths, and profile readiness.</p>
     </div>
     """, unsafe_allow_html=True)
+    st.page_link("pages/2_📄_Resume_Analyzer.py", label="📄 Open Resume Analyzer", use_container_width=True)
 
-with c2:
+with col2:
     st.markdown("""
     <div class="glass-card">
         <h3>📊 3. Job Compatibility & Roadmap</h3>
         <p style="color: #cbd5e1;">Compare your candidate profile against target job descriptions, calculate match score %, and generate a 4-week learning roadmap.</p>
     </div>
-    <div class="glass-card">
+    """, unsafe_allow_html=True)
+    st.page_link("pages/3_📊_Job_Match_and_Roadmap.py", label="📊 Open Job Compatibility & Roadmap", use_container_width=True)
+
+    st.markdown("""
+    <div class="glass-card" style="margin-top: 24px;">
         <h3>💬 4. AI Career Coach</h3>
         <p style="color: #cbd5e1;">Interactive conversational AI assistant providing grounded career advice, interview strategy, and ATS resume tips.</p>
     </div>
     """, unsafe_allow_html=True)
+    st.page_link("pages/4_💬_AI_Career_Coach.py", label="💬 Chat with AI Career Coach", use_container_width=True)
