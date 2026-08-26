@@ -8,35 +8,63 @@ st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap');
 
-    html, body, [class*="css"], .stApp {
+    /* Global App Theme */
+    html, body, .stApp {
         font-family: 'Inter', sans-serif !important;
         background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
         color: #f8fafc !important;
     }
-    p, span, label, div,
-    .stMarkdown, .stText, [data-testid="stWidgetLabel"] p {
-        color: #f8fafc !important;
-        font-family: 'Inter', sans-serif !important;
-    }
+
+    /* Headings */
     h1, h2, h3, h4, h5, h6 {
         font-family: 'Outfit', sans-serif !important;
         color: #ffffff !important;
         font-weight: 700 !important;
     }
-    .glass-card {
-        background: rgba(30, 41, 59, 0.75);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 14px;
-        padding: 22px;
-        margin-bottom: 18px;
+
+    /* Captions & Subtitles */
+    .stCaption, [data-testid="stCaptionContainer"] p, [data-testid="stCaptionContainer"] {
+        color: #cbd5e1 !important;
+        font-size: 0.98rem !important;
+        font-weight: 500 !important;
     }
+
+    /* Chat Messages Box */
     [data-testid="stChatMessage"] {
-        background-color: rgba(30, 41, 59, 0.8) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        background-color: rgba(30, 41, 59, 0.85) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
         border-radius: 12px !important;
-        padding: 16px !important;
-        margin-bottom: 12px !important;
+        padding: 18px !important;
+        margin-bottom: 14px !important;
+    }
+    [data-testid="stChatMessage"] p, [data-testid="stChatMessage"] li {
+        color: #f8fafc !important;
+        font-size: 1.02rem !important;
+        line-height: 1.6 !important;
+    }
+
+    /* Fix Streamlit Material Icons Text Overlay */
+    .material-symbols-outlined, .material-icons, [class*="material-symbols"], [data-testid="stIcon"] {
+        font-family: 'Material Symbols Outlined', 'Material Icons' !important;
+    }
+
+    /* Chat Input Styling - Dark Input Box with Crisp White Typing Text */
+    [data-testid="stChatInput"] {
+        background-color: #1e293b !important;
+        border: 2px solid #475569 !important;
+        border-radius: 12px !important;
+    }
+    [data-testid="stChatInput"] textarea,
+    [data-testid="stChatInput"] input {
+        background-color: #1e293b !important;
+        color: #ffffff !important;
+        font-size: 1.05rem !important;
+        font-weight: 500 !important;
+        font-family: 'Inter', sans-serif !important;
+    }
+    [data-testid="stChatInput"] textarea::placeholder,
+    [data-testid="stChatInput"] input::placeholder {
+        color: #94a3b8 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -47,25 +75,45 @@ if st.button("🏠 Back to Home Dashboard", key="btn_home_p4"):
 
 if "chat_history" not in st.session_state:
     st.session_state["chat_history"] = [
-        {"role": "assistant", "content": "Hello! I am your AI Career Coach. Ask me any question about technical interviews, system design, resume ATS optimization, framework concepts, or salary negotiation!"}
+        {"role": "assistant", "content": "Hello! I am your AI Career Coach. Ask me any question about DSA, technical interviews, system design, resume ATS optimization, framework concepts, or salary negotiation!"}
     ]
 
 st.markdown("# 💬 Grounded AI Career Guidance Coach")
-st.caption("Ask questions about career strategy, interview preparation, salary negotiation, or technical growth.")
+st.caption("Ask questions about career strategy, DSA data structures, interview preparation, salary negotiation, or technical growth.")
 
 for msg in st.session_state["chat_history"]:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-user_prompt = st.chat_input("Ask your career or technical question (e.g., How do I explain database indexing or STAR framework?)...")
+user_prompt = st.chat_input("Ask your career or technical question (e.g. How to learn DSA / Data Structures & Algorithms?)...")
 
 
 def generate_ai_career_response(user_question: str) -> str:
     """Intelligent multi-category AI Career Coach response generator."""
     q = user_question.lower().strip()
     
+    # 0. Data Structures & Algorithms (DSA) / Problem Solving / LeetCode
+    if any(k in q for k in ["dsa", "data structure", "algorithm", "leetcode", "array", "binary tree", "graph", "dynamic programming", "sorting", "time complexity", "big o"]):
+        return (
+            "### 🧮 AI Career Coach: Data Structures & Algorithms (DSA) Roadmap\n\n"
+            "To master **DSA for Coding Interviews & Technical Growth**, follow this structured 4-Step Learning Path:\n\n"
+            "1. **Core Data Structures Mastery**:\n"
+            "   * **Arrays & Two-Pointers / Sliding Window**: Practice sub-array sums, binary search, and prefix sums.\n"
+            "   * **Hash Maps & Sets**: Master O(1) lookups, frequency counting, and string anagram problems.\n"
+            "   * **Linked Lists, Stacks & Queues**: Practice slow/fast pointers, monotonic stacks, and BFS queue traversal.\n\n"
+            "2. **Advanced Trees & Graphs**:\n"
+            "   * **Binary Search Trees (BST)**: In-order, pre-order, and post-order traversal using recursion/DFS.\n"
+            "   * **Graph Algorithms**: Breadth-First Search (BFS) for shortest path, Depth-First Search (DFS) for island/grid problems, and Dijkstra's algorithm.\n\n"
+            "3. **Dynamic Programming & Greedy Algorithms**:\n"
+            "   * Start with 1D DP (Memoization & Tabulation): Climbing Stairs, House Robber, Fibonacci.\n"
+            "   * Advance to 2D DP: Longest Common Subsequence, 0/1 Knapsack, and Edit Distance.\n\n"
+            "4. **Time & Space Complexity Analysis (Big-O)**:\n"
+            "   * Always analyze your solution's Time Complexity (e.g., $O(N \\log N)$ sorting) and Space Complexity (e.g., $O(N)$ hash map space) during technical interviews.\n\n"
+            "🎯 *Recommended Daily Goal*: Solve 1 Medium LeetCode/NeetCode problem daily and explain your logic out loud using the STAR framework."
+        )
+
     # 1. System Design / Architecture / Scaling
-    if any(k in q for k in ["system design", "scale", "latency", "microservices", "database indexing", "load balancer", "sharding", "caching", "redis"]):
+    elif any(k in q for k in ["system design", "scale", "latency", "microservices", "database indexing", "load balancer", "sharding", "caching", "redis"]):
         return (
             "### 🏗️ AI Career Coach: System Design & Architecture Guidance\n\n"
             "To excel in **System Design & Scalability** discussions, structure your answers using the **4-Step Framework**:\n\n"
@@ -138,8 +186,8 @@ def generate_ai_career_response(user_question: str) -> str:
     # 7. General / Catch-All Intelligent Career Guidance
     else:
         return (
-            f"### 💡 AI Career Coach: Personalized Career Strategy\n\n"
-            f"Thank you for asking about **'{user_question}'**! Here is my tailored guidance for your career progression:\n\n"
+            f"### 💡 AI Career Coach: Personalized Guidance\n\n"
+            f"Thank you for asking about **'{user_question}'**! Here is my tailored advice for your career progression:\n\n"
             f"1. **Core Technical Focus**: Focus on deep understanding of foundational concepts rather than surface-level framework usage.\n"
             f"2. **Demonstrable Proof**: Build 2-3 end-to-end open-source projects on GitHub with comprehensive README documentation, architectural diagrams, and automated unit tests.\n"
             f"3. **Structured Communication**: Practice explaining technical concepts clearly using plain language, trade-off comparisons, and concrete performance metrics.\n"

@@ -8,12 +8,12 @@ st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap');
 
-    html, body, [class*="css"], .stApp {
+    html, body, .stApp {
         font-family: 'Inter', sans-serif !important;
         background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
         color: #f8fafc !important;
     }
-    p, span, label, div,
+    p, label, div,
     .stMarkdown, .stText, [data-testid="stWidgetLabel"] p {
         color: #f8fafc !important;
         font-family: 'Inter', sans-serif !important;
@@ -22,6 +22,18 @@ st.markdown("""
         font-family: 'Outfit', sans-serif !important;
         color: #ffffff !important;
         font-weight: 700 !important;
+    }
+
+    /* Fix Streamlit Material Icons Text Overlay */
+    .material-symbols-outlined, .material-icons, [class*="material-symbols"], [data-testid="stIcon"] {
+        font-family: 'Material Symbols Outlined', 'Material Icons' !important;
+    }
+
+    /* Captions & Subtitles */
+    .stCaption, [data-testid="stCaptionContainer"] p, [data-testid="stCaptionContainer"] {
+        color: #cbd5e1 !important;
+        font-size: 0.98rem !important;
+        font-weight: 500 !important;
     }
 
     /* Force Dark Navy Sidebar with High Contrast White Text */
