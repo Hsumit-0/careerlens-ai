@@ -42,7 +42,7 @@ class _JobsHubScreenState extends ConsumerState<JobsHubScreen> {
     final jobs = await repo.searchJobs(
       query: _searchController.text.trim(),
       remoteOnly: _selectedFilter == 'Remote',
-      experience_level: _selectedFilter == 'Fresher' ? 'Entry Level' : null,
+      experienceLevel: _selectedFilter == 'Fresher' ? 'Entry Level' : null,
     );
     final recommended = await repo.getRecommendations();
 
