@@ -39,7 +39,7 @@ class _InterviewStudioScreenState extends ConsumerState<InterviewStudioScreen> {
       _viewId = 'web-cam-view-${DateTime.now().millisecondsSinceEpoch}';
       _videoElement = html.VideoElement()
         ..autoplay = true
-        ..muted = true // Crucial for Chrome autoplay policy
+        ..muted = true
         ..style.width = '100%'
         ..style.height = '100%'
         ..style.objectFit = 'cover'
@@ -57,7 +57,7 @@ class _InterviewStudioScreenState extends ConsumerState<InterviewStudioScreen> {
       }).then((stream) {
         if (_videoElement != null) {
           _videoElement!.srcObject = stream;
-          _videoElement!.play(); // Forces immediate video playback
+          _videoElement!.play();
           setState(() => _hasCameraStream = true);
         }
       }).catchError((err) {
@@ -186,7 +186,7 @@ class _InterviewStudioScreenState extends ConsumerState<InterviewStudioScreen> {
               padding: const EdgeInsets.all(18.0),
               child: Column(
                 children: [
-                  // Live Camera Stream Box with explicit play() & HTML view
+                  // Live Camera Stream Box
                   if (state.cameraEnabled)
                     Container(
                       height: 220,
@@ -323,7 +323,7 @@ class _InterviewStudioScreenState extends ConsumerState<InterviewStudioScreen> {
 
                   const SizedBox(height: 16),
 
-                  // LARGE PROMINENT UN-MISSABLE MICROPHONE RECORD BUTTON
+                  // LARGE VIBRANT PERMANENT RED MICROPHONE BUTTON (NO SCALE 0 ANIMATION)
                   if (_useVoiceInput) ...[
                     Container(
                       width: double.infinity,
@@ -349,21 +349,24 @@ class _InterviewStudioScreenState extends ConsumerState<InterviewStudioScreen> {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: _isRecording ? Colors.redAccent : const Color(0xFFEF4444),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                              elevation: 8,
+                          SizedBox(
+                            width: double.infinity,
+                            height: 56,
+                            child: ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _isRecording ? Colors.redAccent : const Color(0xFFEF4444),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                                elevation: 6,
+                              ),
+                              icon: Icon(_isRecording ? Icons.stop_circle_rounded : Icons.mic_rounded, size: 28),
+                              label: Text(
+                                _isRecording ? 'TAP TO STOP RECORDING' : '🎙️ START RECORDING YOUR VOICE',
+                                style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                              onPressed: _toggleMicRecording,
                             ),
-                            icon: Icon(_isRecording ? Icons.stop_circle_rounded : Icons.mic_rounded, size: 30),
-                            label: Text(
-                              _isRecording ? 'TAP TO STOP RECORDING' : '🎙️ TAP HERE TO RECORD YOUR VOICE',
-                              style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.bold),
-                            ),
-                            onPressed: _toggleMicRecording,
-                          ).animate(target: _isRecording ? 1 : 0).scale(duration: 300.ms),
+                          ),
                         ],
                       ),
                     ),
@@ -371,7 +374,7 @@ class _InterviewStudioScreenState extends ConsumerState<InterviewStudioScreen> {
 
                   const SizedBox(height: 16),
 
-                  // Spoken / Written Response Box
+                  // Response Box
                   TextField(
                     controller: _textController,
                     maxLines: 4,

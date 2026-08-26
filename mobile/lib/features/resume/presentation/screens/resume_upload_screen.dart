@@ -10,6 +10,7 @@ import 'package:dio/dio.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/custom_widgets.dart';
+import '../../../auth/providers/auth_provider.dart';
 
 class ResumeUploadScreen extends ConsumerStatefulWidget {
   const ResumeUploadScreen({super.key});
