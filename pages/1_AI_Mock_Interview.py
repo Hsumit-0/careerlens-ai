@@ -18,51 +18,22 @@ try:
 except Exception:
     MODULES_READY = False
 
-
 st.markdown("""
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap');
 
-    .stApp {
+    html, body, .stApp {
+        font-family: 'Inter', sans-serif !important;
         background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
         color: #f8fafc !important;
     }
-    p, span, label, div, h1, h2, h3, h4, h5, h6,
+    p, label, div,
     .stMarkdown, .stText, [data-testid="stWidgetLabel"] p {
         color: #f8fafc !important;
+        font-family: 'Inter', sans-serif !important;
     }
-    label, [data-testid="stWidgetLabel"] p {
-        color: #e2e8f0 !important;
-        font-weight: 600 !important;
-    }
-    /* Force Dark Navy Sidebar with High Contrast White Text */
-    [data-testid="stSidebar"] {
-        background-color: #0f172a !important;
-        border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
-    }
-    [data-testid="stSidebar"] p,
-    [data-testid="stSidebar"] span,
-    [data-testid="stSidebar"] label,
-    [data-testid="stSidebar"] h1,
-    [data-testid="stSidebar"] h2,
-    [data-testid="stSidebar"] h3,
-    [data-testid="stSidebar"] h4,
-    [data-testid="stSidebar"] div,
-    [data-testid="stSidebar"] .stMarkdown {
-        color: #f8fafc !important;
-    }
-    [data-testid="stSidebar"] input {
-        background-color: #1e293b !important;
-        color: #ffffff !important;
-        border: 1px solid #475569 !important;
-        border-radius: 6px !important;
-    }
-    [data-testid="stSidebar"] button {
-        background: linear-gradient(90deg, #2563eb 0%, #7c3aed 100%) !important;
-        color: #ffffff !important;
-        border-radius: 8px !important;
-        border: none !important;
-    }
-    [data-testid="stSidebar"] button p, [data-testid="stSidebar"] button span {
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Outfit', sans-serif !important;
         color: #ffffff !important;
         font-weight: 700 !important;
     }
@@ -84,6 +55,22 @@ st.markdown("""
         display: inline-block;
         text-align: center;
     }
+    /* Streamlit Action Buttons Styling */
+    .stButton > button {
+        background: linear-gradient(90deg, #2563eb 0%, #7c3aed 100%) !important;
+        color: #ffffff !important;
+        font-family: 'Outfit', sans-serif !important;
+        font-weight: 700 !important;
+        border-radius: 10px !important;
+        padding: 12px 24px !important;
+        font-size: 1.05rem !important;
+        border: 1px solid #60a5fa !important;
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35) !important;
+    }
+    .stButton > button p, .stButton > button span {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -91,8 +78,8 @@ if "generated_questions" not in st.session_state:
     st.session_state["generated_questions"] = []
 
 if st.button("🏠 Back to Home Dashboard", key="btn_home_p1"):
-    st.switch_page("streamlit_app.py")
-
+    st.session_state["target_page"] = "pages/0_Home.py"
+    st.rerun()
 
 st.markdown("# 🎯 Live AI Mock Interview Practice")
 st.caption("Practice mock interviews with simultaneous video camera stream and real-time microphone speech-to-text transcription.")
@@ -201,9 +188,9 @@ with col_setup2:
         """, unsafe_allow_html=True)
         
         st.markdown("### 🎥 Simultaneous Live Camera & Real-Time Speech-to-Text")
-        st.caption("Your camera stream and microphone operate simultaneously. Speak directly into your mic while looking at the camera, and your words will appear live below.")
+        st.caption("Your camera stream and microphone operate simultaneously. Click **▶️ Start Camera & Mic Listening** below to start.")
         
-        # HTML5 WebRTC Media + Web Speech API Component
+        # HTML5 WebRTC Media + Web Speech API Component with Action Controls at TOP and BOTTOM
         speech_component_html = """
         <!DOCTYPE html>
         <html>
@@ -214,16 +201,27 @@ with col_setup2:
                     color: #f8fafc;
                     font-family: system-ui, -apple-system, sans-serif;
                     margin: 0;
-                    padding: 10px;
+                    padding: 8px;
+                }
+                .control-bar {
+                    background: #1e293b;
+                    border: 2px solid #3b82f6;
+                    border-radius: 10px;
+                    padding: 12px;
+                    margin-bottom: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 12px;
                 }
                 .container {
                     display: flex;
                     flex-wrap: wrap;
-                    gap: 16px;
+                    gap: 14px;
                 }
                 .video-box {
                     flex: 1;
-                    min-width: 280px;
+                    min-width: 260px;
                     background: #1e293b;
                     border: 2px solid #3b82f6;
                     border-radius: 12px;
@@ -232,18 +230,18 @@ with col_setup2:
                 }
                 video {
                     width: 100%;
-                    max-height: 220px;
+                    max-height: 240px;
                     border-radius: 8px;
                     background: #000;
                     object-fit: cover;
                 }
                 .transcript-box {
-                    flex: 1;
+                    flex: 1.2;
                     min-width: 280px;
                     background: #1e293b;
                     border: 2px solid #8b5cf6;
                     border-radius: 12px;
-                    padding: 14px;
+                    padding: 12px;
                     display: flex;
                     flex-direction: column;
                 }
@@ -251,63 +249,68 @@ with col_setup2:
                     font-weight: 700;
                     color: #a78bfa;
                     margin-bottom: 8px;
-                    font-size: 1rem;
+                    font-size: 1.05rem;
                 }
                 .transcript-content {
                     flex-grow: 1;
-                    min-height: 140px;
+                    min-height: 180px;
                     background: #0f172a;
                     border: 1px solid #334155;
                     border-radius: 8px;
                     padding: 12px;
                     color: #f8fafc;
-                    font-size: 1rem;
+                    font-size: 1.05rem;
                     overflow-y: auto;
                     line-height: 1.5;
                 }
-                .btn-row {
-                    margin-top: 12px;
-                    display: flex;
-                    gap: 10px;
-                }
-                button {
+                .action-btn {
                     background: linear-gradient(90deg, #2563eb 0%, #7c3aed 100%);
                     color: white;
                     border: none;
-                    border-radius: 6px;
-                    padding: 10px 16px;
-                    font-weight: 600;
+                    border-radius: 8px;
+                    padding: 12px 22px;
+                    font-size: 1.05rem;
+                    font-weight: 700;
                     cursor: pointer;
+                    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
                 }
-                button.stop {
-                    background: #ef4444;
+                .stop-btn {
+                    background: #ef4444 !important;
+                    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4) !important;
                 }
                 .status-indicator {
                     display: inline-block;
-                    width: 10px;
-                    height: 10px;
-                    background-color: #22c55e;
+                    width: 12px;
+                    height: 12px;
+                    background-color: #ef4444;
                     border-radius: 50%;
-                    margin-right: 6px;
+                    margin-right: 8px;
                 }
             </style>
         </head>
         <body>
+            <div class="control-bar">
+                <div>
+                    <span id="statusDot" class="status-indicator"></span>
+                    <strong style="color: #60a5fa; font-size: 1.1rem;">Live Media Session:</strong> 
+                    <span id="statusText" style="color: #cbd5e1;">Click 'Start Camera & Mic Listening' to activate</span>
+                </div>
+                <div>
+                    <button class="action-btn" onclick="startCameraAndSpeech()">▶️ Start Camera & Mic Listening</button>
+                    <button class="action-btn stop-btn" onclick="stopCameraAndSpeech()">⏹️ Stop</button>
+                </div>
+            </div>
+
             <div class="container">
                 <div class="video-box">
-                    <div style="font-weight: 600; margin-bottom: 6px; color: #60a5fa;">📷 Live Camera Feed</div>
+                    <div style="font-weight: 700; margin-bottom: 8px; color: #60a5fa; font-size: 1.05rem;">📷 Live Camera Feed</div>
                     <video id="webcam" autoplay playsinline muted></video>
                 </div>
                 <div class="transcript-box">
                     <div class="transcript-title">
-                        <span id="statusDot" class="status-indicator" style="background-color: #ef4444;"></span>
                         🎙️ Live Speech-to-Text Transcript (Interview Chat)
                     </div>
-                    <div id="transcript" class="transcript-content">Click 'Start Camera & Mic Listening' to begin speaking...</div>
-                    <div class="btn-row">
-                        <button id="startBtn" onclick="startCameraAndSpeech()">▶️ Start Camera & Mic Listening</button>
-                        <button id="stopBtn" class="stop" onclick="stopCameraAndSpeech()">⏹️ Stop</button>
-                    </div>
+                    <div id="transcript" class="transcript-content">Click 'Start Camera & Mic Listening' above to begin speaking into your microphone...</div>
                 </div>
             </div>
 
@@ -339,6 +342,7 @@ with col_setup2:
                     recognition.onstart = function() {
                         isListening = true;
                         document.getElementById('statusDot').style.backgroundColor = '#22c55e';
+                        document.getElementById('statusText').innerText = "Camera & Mic Active - Listening...";
                     };
 
                     recognition.onresult = function(event) {
@@ -369,6 +373,7 @@ with col_setup2:
                 function stopCameraAndSpeech() {
                     isListening = false;
                     document.getElementById('statusDot').style.backgroundColor = '#ef4444';
+                    document.getElementById('statusText').innerText = "Stopped";
                     if (recognition) {
                         recognition.stop();
                     }
@@ -381,7 +386,7 @@ with col_setup2:
         </html>
         """
         
-        components.html(speech_component_html, height=340)
+        components.html(speech_component_html, height=480)
         
         answer_text = st.text_area(
             "Final Transcribed Answer (Edit or type response if needed):",
