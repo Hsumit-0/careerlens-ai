@@ -17,6 +17,7 @@ render_sidebar_auth()
 
 st.markdown("""
 <style>
+    /* Main Theme */
     .stApp {
         background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
         color: #f8fafc !important;
@@ -25,6 +26,41 @@ st.markdown("""
     .stMarkdown, .stText, [data-testid="stWidgetLabel"] p {
         color: #f8fafc !important;
     }
+
+    /* Force Dark Navy Sidebar with High Contrast White Text */
+    [data-testid="stSidebar"] {
+        background-color: #0f172a !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
+    }
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] span,
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3,
+    [data-testid="stSidebar"] h4,
+    [data-testid="stSidebar"] div,
+    [data-testid="stSidebar"] .stMarkdown {
+        color: #f8fafc !important;
+    }
+    [data-testid="stSidebar"] input {
+        background-color: #1e293b !important;
+        color: #ffffff !important;
+        border: 1px solid #475569 !important;
+        border-radius: 6px !important;
+    }
+    [data-testid="stSidebar"] button {
+        background: linear-gradient(90deg, #2563eb 0%, #7c3aed 100%) !important;
+        color: #ffffff !important;
+        border-radius: 8px !important;
+        border: none !important;
+    }
+    [data-testid="stSidebar"] button p, [data-testid="stSidebar"] button span {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+    }
+
+    /* Banner Container */
     .header-box {
         background: rgba(30, 41, 59, 0.85);
         backdrop-filter: blur(12px);
@@ -48,21 +84,21 @@ st.markdown("""
         border: 1px solid rgba(255, 255, 255, 0.12);
         border-radius: 14px;
         padding: 24px;
-        margin-bottom: 16px;
+        margin-bottom: 14px;
     }
-    [data-testid="stPageLink-NavLink"] {
+
+    /* Primary Action Buttons */
+    .stButton > button {
         background: linear-gradient(90deg, #2563eb 0%, #7c3aed 100%) !important;
         color: #ffffff !important;
-        border-radius: 10px !important;
-        padding: 12px 20px !important;
         font-weight: 700 !important;
+        border-radius: 10px !important;
+        padding: 12px 24px !important;
         font-size: 1.05rem !important;
-        text-align: center !important;
-        margin-top: 10px !important;
         border: 1px solid #60a5fa !important;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35) !important;
     }
-    [data-testid="stPageLink-NavLink"] p, [data-testid="stPageLink-NavLink"] span {
+    .stButton > button p, .stButton > button span {
         color: #ffffff !important;
         font-weight: 700 !important;
     }
@@ -93,7 +129,8 @@ with col1:
         <p style="color: #cbd5e1;">Live WebCam video stream and real-time speech-to-text microphone transcription with instant STAR framework scoring, WPM pace, and filler word detection.</p>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/1_AI_Mock_Interview.py", label="Launch AI Mock Interview Practice", icon="🎯", use_container_width=True)
+    if st.button("🚀 Launch AI Mock Interview Practice", key="btn_nav_p1", use_container_width=True):
+        st.switch_page("pages/1_AI_Mock_Interview.py")
 
     st.markdown("""
     <div class="glass-card" style="margin-top: 24px;">
@@ -101,7 +138,8 @@ with col1:
         <p style="color: #cbd5e1;">Upload PDF resumes to extract technical skills, domain strengths, and profile readiness.</p>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/2_Resume_Analyzer.py", label="Open Resume Analyzer", icon="📄", use_container_width=True)
+    if st.button("📄 Open Resume Analyzer", key="btn_nav_p2", use_container_width=True):
+        st.switch_page("pages/2_Resume_Analyzer.py")
 
 with col2:
     st.markdown("""
@@ -110,7 +148,8 @@ with col2:
         <p style="color: #cbd5e1;">Compare your candidate profile against target job descriptions, calculate match score %, and generate a 4-week learning roadmap.</p>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/3_Job_Match_and_Roadmap.py", label="Open Job Compatibility & Roadmap", icon="📊", use_container_width=True)
+    if st.button("📊 Open Job Compatibility & Roadmap", key="btn_nav_p3", use_container_width=True):
+        st.switch_page("pages/3_Job_Match_and_Roadmap.py")
 
     st.markdown("""
     <div class="glass-card" style="margin-top: 24px;">
@@ -118,4 +157,5 @@ with col2:
         <p style="color: #cbd5e1;">Interactive conversational AI assistant providing grounded career advice, interview strategy, and ATS resume tips.</p>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/4_AI_Career_Coach.py", label="Chat with AI Career Coach", icon="💬", use_container_width=True)
+    if st.button("💬 Chat with AI Career Coach", key="btn_nav_p4", use_container_width=True):
+        st.switch_page("pages/4_AI_Career_Coach.py")

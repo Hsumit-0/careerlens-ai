@@ -25,6 +25,38 @@ st.markdown("""
     .stMarkdown, .stText, [data-testid="stWidgetLabel"] p {
         color: #f8fafc !important;
     }
+    /* Force Dark Navy Sidebar with High Contrast White Text */
+    [data-testid="stSidebar"] {
+        background-color: #0f172a !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
+    }
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] span,
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3,
+    [data-testid="stSidebar"] h4,
+    [data-testid="stSidebar"] div,
+    [data-testid="stSidebar"] .stMarkdown {
+        color: #f8fafc !important;
+    }
+    [data-testid="stSidebar"] input {
+        background-color: #1e293b !important;
+        color: #ffffff !important;
+        border: 1px solid #475569 !important;
+        border-radius: 6px !important;
+    }
+    [data-testid="stSidebar"] button {
+        background: linear-gradient(90deg, #2563eb 0%, #7c3aed 100%) !important;
+        color: #ffffff !important;
+        border-radius: 8px !important;
+        border: none !important;
+    }
+    [data-testid="stSidebar"] button p, [data-testid="stSidebar"] button span {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+    }
     .glass-card {
         background: rgba(30, 41, 59, 0.75);
         backdrop-filter: blur(10px);
@@ -36,12 +68,13 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+if st.button("🏠 Back to Home Dashboard", key="btn_home_p4"):
+    st.switch_page("streamlit_app.py")
+
 if "chat_history" not in st.session_state:
     st.session_state["chat_history"] = [
         {"role": "assistant", "content": "Hello! I am your AI Career Coach. How can I help you with your career goals, resume strategy, or interview preparation today?"}
     ]
-
-st.page_link("streamlit_app.py", label="Home Overview Dashboard", icon="🏠")
 
 st.markdown("# 💬 Grounded AI Career Guidance Coach")
 st.caption("Ask questions about career strategy, interview preparation, salary negotiation, or technical growth.")

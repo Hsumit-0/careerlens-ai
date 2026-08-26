@@ -41,6 +41,38 @@ st.markdown("""
         color: #e2e8f0 !important;
         font-weight: 600 !important;
     }
+    /* Force Dark Navy Sidebar with High Contrast White Text */
+    [data-testid="stSidebar"] {
+        background-color: #0f172a !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
+    }
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] span,
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3,
+    [data-testid="stSidebar"] h4,
+    [data-testid="stSidebar"] div,
+    [data-testid="stSidebar"] .stMarkdown {
+        color: #f8fafc !important;
+    }
+    [data-testid="stSidebar"] input {
+        background-color: #1e293b !important;
+        color: #ffffff !important;
+        border: 1px solid #475569 !important;
+        border-radius: 6px !important;
+    }
+    [data-testid="stSidebar"] button {
+        background: linear-gradient(90deg, #2563eb 0%, #7c3aed 100%) !important;
+        color: #ffffff !important;
+        border-radius: 8px !important;
+        border: none !important;
+    }
+    [data-testid="stSidebar"] button p, [data-testid="stSidebar"] button span {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+    }
     .glass-card {
         background: rgba(30, 41, 59, 0.75);
         backdrop-filter: blur(10px);
@@ -65,7 +97,9 @@ st.markdown("""
 if "generated_questions" not in st.session_state:
     st.session_state["generated_questions"] = []
 
-st.page_link("streamlit_app.py", label="Home Overview Dashboard", icon="🏠")
+if st.button("🏠 Back to Home Dashboard", key="btn_home_p1"):
+    st.switch_page("streamlit_app.py")
+
 
 st.markdown("# 🎯 Live AI Mock Interview Practice")
 st.caption("Practice mock interviews with simultaneous video camera stream and real-time microphone speech-to-text transcription.")

@@ -1,7 +1,46 @@
 import streamlit as st
 
 def render_sidebar_auth():
-    """Renders sleek Login / Register / Logout user authentication widget in the sidebar."""
+    """Renders sleek Login / Register / Logout user authentication widget in the sidebar with explicit high-contrast styling."""
+    
+    # Inject CSS for Sidebar High Contrast
+    st.markdown("""
+    <style>
+        /* Force Dark Navy Sidebar with Crisp White Text */
+        [data-testid="stSidebar"] {
+            background-color: #0f172a !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
+        }
+        [data-testid="stSidebar"] p,
+        [data-testid="stSidebar"] span,
+        [data-testid="stSidebar"] label,
+        [data-testid="stSidebar"] h1,
+        [data-testid="stSidebar"] h2,
+        [data-testid="stSidebar"] h3,
+        [data-testid="stSidebar"] h4,
+        [data-testid="stSidebar"] div,
+        [data-testid="stSidebar"] .stMarkdown {
+            color: #f8fafc !important;
+        }
+        [data-testid="stSidebar"] input {
+            background-color: #1e293b !important;
+            color: #ffffff !important;
+            border: 1px solid #475569 !important;
+            border-radius: 6px !important;
+        }
+        [data-testid="stSidebar"] button {
+            background: linear-gradient(90deg, #2563eb 0%, #7c3aed 100%) !important;
+            color: #ffffff !important;
+            border-radius: 8px !important;
+            border: none !important;
+        }
+        [data-testid="stSidebar"] button p, [data-testid="stSidebar"] button span {
+            color: #ffffff !important;
+            font-weight: 700 !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
     if "user_authenticated" not in st.session_state:
         st.session_state["user_authenticated"] = False
     if "user_email" not in st.session_state:
