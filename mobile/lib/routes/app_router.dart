@@ -9,6 +9,9 @@ import '../features/dashboard/presentation/screens/placeholder_dashboard.dart';
 import '../features/interview/presentation/screens/interview_setup_screen.dart';
 import '../features/interview/presentation/screens/interview_studio_screen.dart';
 import '../features/interview/presentation/screens/interview_report_screen.dart';
+import '../features/jobs/presentation/screens/jobs_hub_screen.dart';
+import '../features/jobs/presentation/screens/job_details_screen.dart';
+import '../features/jobs/presentation/screens/job_tracker_screen.dart';
 import '../features/resume/presentation/screens/ats_analysis_screen.dart';
 import '../features/resume/presentation/screens/resume_upload_screen.dart';
 import '../features/roadmap/presentation/screens/career_navigator_screen.dart';
@@ -34,6 +37,21 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/dashboard',
         builder: (context, state) => const PlaceholderDashboard(),
+      ),
+      GoRoute(
+        path: '/jobs',
+        builder: (context, state) => const JobsHubScreen(),
+      ),
+      GoRoute(
+        path: '/jobs/tracker',
+        builder: (context, state) => const JobTrackerScreen(),
+      ),
+      GoRoute(
+        path: '/jobs/:id',
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? 'job-google-101';
+          return JobDetailsScreen(jobId: id);
+        },
       ),
       GoRoute(
         path: '/resume-upload',
@@ -62,26 +80,16 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
     redirect: (context, state) {
       final status = authState.status;
-      final isSplashing = state.matchedLocation == '/splash';
-      final isLoggingIn = state.matchedLocation == '/login';
-      final isRegistering = state.matchedLocation == '/register';
+      final isLoggingIn = state.matchedLocation == '/login' ||
+          state.matchedLocation == '/register' ||
+          state.matchedLocation == '/splash';
 
-      if (status == AuthStatus.initial || status == AuthStatus.authenticating) {
-        return isSplashing ? null : '/splash';
+      if (status == AuthStatus.unauthenticated && !isLoggingIn) {
+        return '/login';
       }
-
-      if (status == AuthStatus.authenticated) {
-        if (isSplashing || isLoggingIn || isRegistering) {
-          return '/dashboard';
-        }
+      if (status == AuthStatus.authenticated && isLoggingIn) {
+        return '/dashboard';
       }
-
-      if (status == AuthStatus.unauthenticated || status == AuthStatus.error) {
-        if (!isLoggingIn && !isRegistering) {
-          return '/login';
-        }
-      }
-
       return null;
     },
   );

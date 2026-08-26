@@ -37,6 +37,11 @@ class PlaceholderDashboard extends ConsumerWidget {
         ),
         actions: [
           IconButton(
+            icon: const Icon(Icons.work_outline_rounded),
+            tooltip: 'Jobs Hub & Matching',
+            onPressed: () => context.push('/jobs'),
+          ),
+          IconButton(
             icon: const Icon(Icons.upload_file_outlined),
             tooltip: 'Upload / Manage Resumes',
             onPressed: () => context.push('/resume-upload'),
