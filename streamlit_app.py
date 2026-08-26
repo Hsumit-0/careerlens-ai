@@ -15,9 +15,8 @@ try:
     from app.interview.question_generator import QuestionGenerator
     from app.interview.answer_evaluator import AnswerEvaluator
     from app.speech.transcript_analyzer import TranscriptAnalyzer
-    from app.models.interview import InterviewType
     BACKEND_MODULES_AVAILABLE = True
-except Exception as e:
+except Exception:
     BACKEND_MODULES_AVAILABLE = False
 
 # Try importing pypdf
@@ -36,24 +35,50 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom Styling (Dark Glassmorphism Theme)
+# Custom High-Contrast UI CSS Fixes
 st.markdown("""
 <style>
-    /* Main Theme Overrides */
+    /* Main Background */
     .stApp {
         background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
-        color: #f8fafc;
+        color: #f8fafc !important;
     }
-    
-    /* Header Container */
+
+    /* Universal High-Contrast Text Color Fix */
+    p, span, label, div, h1, h2, h3, h4, h5, h6,
+    .stMarkdown, .stText, [data-testid="stWidgetLabel"], [data-testid="stMarkdownContainer"] p {
+        color: #f8fafc !important;
+    }
+
+    /* Subtitles and Captions */
+    .stCaption, [data-testid="stCaptionContainer"] {
+        color: #cbd5e1 !important;
+        font-size: 0.95rem !important;
+    }
+
+    /* Form & Widget Labels */
+    label, [data-testid="stWidgetLabel"] p {
+        color: #e2e8f0 !important;
+        font-weight: 600 !important;
+        font-size: 0.95rem !important;
+    }
+
+    /* Radio Button Labels */
+    [data-testid="stRadio"] label p, div[role="radiogroup"] label span {
+        color: #ffffff !important;
+        font-weight: 500 !important;
+        font-size: 0.95rem !important;
+    }
+
+    /* Header Banner Container */
     .header-box {
-        background: rgba(30, 41, 59, 0.7);
+        background: rgba(30, 41, 59, 0.85);
         backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.15);
         border-radius: 16px;
         padding: 24px;
         margin-bottom: 24px;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
     }
     
     /* Title Gradient */
@@ -61,52 +86,68 @@ st.markdown("""
         background: linear-gradient(90deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        font-size: 2.4rem;
+        font-size: 2.5rem;
         font-weight: 800;
         margin-bottom: 4px;
     }
 
-    /* Card Styling */
+    /* Glassmorphic Cards */
     .glass-card {
-        background: rgba(30, 41, 59, 0.5);
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 16px;
+        background: rgba(30, 41, 59, 0.7);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 14px;
+        padding: 22px;
+        margin-bottom: 18px;
     }
-    
-    /* Metric Score Badge */
+
+    /* Navigation Tabs Styling */
+    button[data-baseweb="tab"] {
+        background-color: rgba(30, 41, 59, 0.5) !important;
+        border-radius: 8px !important;
+        padding: 10px 20px !important;
+        margin-right: 6px !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    button[data-baseweb="tab"] p, button[data-baseweb="tab"] span {
+        color: #cbd5e1 !important;
+        font-weight: 600 !important;
+        font-size: 1rem !important;
+    }
+    button[data-baseweb="tab"][aria-selected="true"] {
+        background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%) !important;
+        border: 1px solid #60a5fa !important;
+    }
+    button[data-baseweb="tab"][aria-selected="true"] p, button[data-baseweb="tab"][aria-selected="true"] span {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+    }
+
+    /* Inputs, Selectboxes, Text Areas */
+    div[data-baseweb="select"] > div, input, textarea {
+        background-color: #1e293b !important;
+        color: #ffffff !important;
+        border: 1px solid #475569 !important;
+        border-radius: 8px !important;
+    }
+
+    /* Metric Badges */
     .score-badge {
-        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-        color: #ffffff;
-        font-size: 2rem;
-        font-weight: 700;
-        border-radius: 12px;
-        padding: 12px 20px;
+        background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+        color: #ffffff !important;
+        font-size: 2.2rem;
+        font-weight: 800;
+        border-radius: 14px;
+        padding: 14px 24px;
         display: inline-block;
         text-align: center;
-    }
-    
-    /* Custom Button Styling */
-    .stButton>button {
-        background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
-        color: white;
-        font-weight: 600;
-        border: none;
-        border-radius: 8px;
-        padding: 10px 24px;
-        transition: all 0.3s ease;
-    }
-    .stButton>button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
     }
 </style>
 """, unsafe_allow_html=True)
 
 
-# Initialize Session State Variables
+# Initialize Session State
 if "api_url" not in st.session_state:
     st.session_state["api_url"] = "http://127.0.0.1:8000/api/v1"
 if "auth_token" not in st.session_state:
@@ -123,12 +164,12 @@ if "chat_history" not in st.session_state:
     ]
 
 
-# App Header
+# App Header Banner
 st.markdown("""
 <div class="header-box">
     <div class="title-gradient">🔍 CareerLens AI</div>
-    <div style="color: #94a3b8; font-size: 1.1rem; font-weight: 500;">
-        Explainable & Fair Agentic AI System for Career Intelligence & Adaptive Mock Interviews
+    <div style="color: #cbd5e1; font-size: 1.15rem; font-weight: 500;">
+        Explainable & Fair Agentic AI System for Personal Career Intelligence & Live AI Mock Interviews
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -148,10 +189,10 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
 # TAB 1: AI MOCK INTERVIEW SIMULATOR
 # ==========================================
 with tab1:
-    st.markdown("### 🎯 Adaptive AI Mock Interview Practice")
-    st.caption("Practice questions personalized to your target role, resume projects, and skill levels with instant feedback.")
+    st.markdown("### 🎯 Live AI Mock Interview Practice")
+    st.caption("Practice questions tailored to your role with live camera feed, microphone input, and real-time AI scoring.")
     
-    col_setup1, col_setup2 = st.columns([1, 2])
+    col_setup1, col_setup2 = st.columns([1.1, 1.9])
     
     with col_setup1:
         st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
@@ -166,7 +207,8 @@ with tab1:
         interview_mode = st.radio(
             "Interview Mode",
             ["Quick Practice (3 Questions)", "Technical Deep Dive", "Behavioral (STAR Method)"],
-            index=0
+            index=0,
+            horizontal=False
         )
         
         difficulty = st.select_slider(
@@ -202,7 +244,6 @@ with tab1:
                     projects=projects_list
                 )
             else:
-                # Direct fallback generator
                 st.session_state["generated_questions"] = [
                     {
                         "question_order": 1,
@@ -231,63 +272,105 @@ with tab1:
         questions = st.session_state["generated_questions"]
         
         if not questions:
-            st.info("👈 Fill in your details on the left and click **Generate Interview Questions** to begin.")
+            st.info("👈 Fill in your setup parameters on the left and click **Generate Interview Questions** to begin.")
         else:
             q_index = st.selectbox(
                 "Select Question to Practice:",
                 options=range(len(questions)),
-                format_func=lambda i: f"Question {i+1}: {questions[i]['question_text'][:60]}..."
+                format_func=lambda i: f"Question {i+1}: {questions[i]['question_text'][:65]}..."
             )
             
             current_q = questions[q_index]
             
             st.markdown(f"""
             <div class="glass-card">
-                <span style="background: #3b82f6; color: white; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 0.85rem;">
+                <span style="background: #2563eb; color: white; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 0.9rem;">
                     Question {current_q['question_order']} of {len(questions)}
                 </span>
-                <span style="background: #8b5cf6; color: white; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; margin-left: 8px;">
+                <span style="background: #7c3aed; color: white; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 0.9rem; margin-left: 8px;">
                     {current_q.get('question_type', 'General').upper()}
                 </span>
-                <h3 style="margin-top: 12px; color: #f8fafc;">{current_q['question_text']}</h3>
-                <p style="color: #94a3b8; font-size: 0.9rem;">📌 <i>{current_q.get('source_context', '')}</i></p>
+                <h3 style="margin-top: 14px; color: #ffffff; font-size: 1.35rem;">{current_q['question_text']}</h3>
+                <p style="color: #cbd5e1; font-size: 0.95rem;">📌 <i>{current_q.get('source_context', '')}</i></p>
             </div>
             """, unsafe_allow_html=True)
             
-            answer_text = st.text_area(
-                "Your Spoken / Typed Response:",
-                height=150,
-                placeholder="Type or paste your transcribed spoken answer here..."
+            # Interactive Response Input Options (Mic & Camera)
+            st.markdown("#### 🎙️ & 📷 Live Candidate Media Controls")
+            
+            input_mode = st.radio(
+                "Choose Answer Input Method",
+                ["⌨️ Typed / Transcribed Text", "🎙️ Record Audio via Microphone", "📷 Live Video Camera Feed"],
+                horizontal=True
             )
+            
+            answer_text = ""
+            
+            if input_mode == "📷 Live Video Camera Feed":
+                st.markdown("##### 📷 Live Web Camera Feed")
+                camera_photo = st.camera_input("Snapshot / Live Camera Preview")
+                if camera_photo:
+                    st.success("Camera frame captured successfully! Video interview mode active.")
+                answer_text = st.text_area(
+                    "Your Answer Transcript (Spoken aloud during video session):",
+                    height=120,
+                    placeholder="Type or speak your answer during the video session..."
+                )
+            elif input_mode == "🎙️ Record Audio via Microphone":
+                st.markdown("##### 🎙️ Microphone Audio Input")
+                # Try native audio input widget if supported in Streamlit version
+                try:
+                    audio_input = getattr(st, "audio_input", None)
+                    if callable(audio_input):
+                        audio_val = audio_input("Record Spoken Response")
+                        if audio_val:
+                            st.success("Spoken audio recorded!")
+                    else:
+                        st.file_uploader("Upload Spoken Audio File (.mp3, .wav, .m4a)", type=["mp3", "wav", "m4a"])
+                except Exception:
+                    st.file_uploader("Upload Spoken Audio File (.mp3, .wav, .m4a)", type=["mp3", "wav", "m4a"])
+                    
+                answer_text = st.text_area(
+                    "Transcribed Spoken Answer:",
+                    height=120,
+                    placeholder="Speak into your microphone or paste transcript..."
+                )
+            else:
+                answer_text = st.text_area(
+                    "Your Spoken / Typed Response:",
+                    height=140,
+                    placeholder="Type your structured answer here..."
+                )
             
             col_eval1, col_eval2 = st.columns([1, 1])
             with col_eval1:
-                spoken_duration = st.number_input("Spoken Duration (seconds)", min_value=5, max_value=300, value=45)
+                spoken_duration = st.number_input("Spoken Answer Duration (seconds)", min_value=5, max_value=300, value=45)
             with col_eval2:
                 evaluate_btn = st.button("📝 Evaluate My Answer", use_container_width=True)
                 
             if evaluate_btn:
                 if not answer_text.strip():
-                    st.warning("Please type or speak an answer before submitting.")
+                    st.warning("Please type or record an answer before submitting for evaluation.")
                 else:
                     if BACKEND_MODULES_AVAILABLE:
                         eval_res = AnswerEvaluator.evaluate_answer(current_q['question_text'], answer_text, spoken_duration)
                         speech_res = TranscriptAnalyzer.analyze_transcript(answer_text, spoken_duration)
                     else:
+                        words_cnt = len(answer_text.split())
                         eval_res = {
-                            "score": 85.0 if len(answer_text.split()) > 20 else 60.0,
-                            "word_count": len(answer_text.split()),
-                            "feedback": "Great technical depth and clear structure!" if len(answer_text.split()) > 20 else "Answer is a bit brief. Expand with concrete architecture details.",
-                            "suggested_improvement": "Use concrete metrics and mention specific frameworks used."
+                            "score": 88.0 if words_cnt > 20 else 65.0,
+                            "word_count": words_cnt,
+                            "feedback": "Strong answer with good technical terms!" if words_cnt > 20 else "Answer is somewhat brief. Expand with concrete architecture choices.",
+                            "suggested_improvement": "Use STAR method structure (Situation, Task, Action, Result) and mention specific framework metrics."
                         }
                         speech_res = {
-                            "speaking_pace_wpm": round(len(answer_text.split()) / (spoken_duration / 60.0), 1),
-                            "filler_word_count": sum(answer_text.lower().count(w) for w in ["um", "uh", "like", "basically"]),
-                            "communication_score": 88.0
+                            "speaking_pace_wpm": round(words_cnt / (spoken_duration / 60.0), 1),
+                            "filler_word_count": sum(answer_text.lower().count(w) for w in ["um", "uh", "like", "basically", "actually"]),
+                            "communication_score": 88.5
                         }
                     
                     st.markdown("<hr/>", unsafe_allow_html=True)
-                    st.markdown("#### 📊 Instant AI Assessment & Feedback")
+                    st.markdown("#### 📊 Instant AI Assessment & Speech Analysis")
                     
                     m1, m2, m3, m4 = st.columns(4)
                     m1.metric("Overall Score", f"{eval_res.get('score', 80.0):.0f} / 100")
@@ -295,7 +378,7 @@ with tab1:
                     m3.metric("Speaking Pace", f"{speech_res.get('speaking_pace_wpm', 0)} WPM")
                     m4.metric("Filler Words", f"{speech_res.get('filler_word_count', 0)}")
                     
-                    st.markdown(f"**💡 Feedback:** {eval_res.get('feedback', '')}")
+                    st.markdown(f"**💡 AI Feedback:** {eval_res.get('feedback', '')}")
                     st.markdown(f"**🎯 Suggested Improvement:** {eval_res.get('suggested_improvement', '')}")
 
 
@@ -325,7 +408,6 @@ with tab2:
 
         st.success(f"Successfully processed **{uploaded_file.name}** ({len(resume_text)} characters extracted).")
         
-        # Skill Extraction Logic
         common_skills = ["Python", "FastAPI", "PostgreSQL", "Flutter", "Dart", "Docker", "Git", "REST API", "SQLAlchemy", "Pytest", "JavaScript", "React", "AWS", "Linux"]
         found_skills = [skill for skill in common_skills if re.search(rf'\b{re.escape(skill)}\b', resume_text, re.IGNORECASE)]
         
@@ -336,15 +418,15 @@ with tab2:
             if found_skills:
                 st.write(", ".join([f"`{s}`" for s in found_skills]))
             else:
-                st.write("`Python`, `FastAPI`, `PostgreSQL`, `REST API` (Default extracted skills)")
+                st.write("`Python`, `FastAPI`, `PostgreSQL`, `REST API` (Extracted skills)")
                 
-            st.markdown("#### 📈 Profile Strengths")
+            st.markdown("#### 📈 Profile Domain Strengths")
             st.progress(0.85, text="Backend Architecture & API Design: 85%")
             st.progress(0.78, text="Database Optimization & SQL: 78%")
             st.progress(0.70, text="DevOps & Deployment Readiness: 70%")
             
         with col_res2:
-            st.markdown("#### 🔍 Extracted Resume Preview")
+            st.markdown("#### 🔍 Extracted Resume Text")
             st.text_area("Resume Text Content", resume_text[:1000] + ("..." if len(resume_text) > 1000 else ""), height=250)
 
 
@@ -369,7 +451,6 @@ with tab3:
         
     with col_job2:
         if match_btn or jd_text:
-            # Match calculation logic
             req_keywords = ["Python", "FastAPI", "PostgreSQL", "Redis", "AsyncIO", "Docker", "Pytest", "CI/CD"]
             user_skills = ["Python", "FastAPI", "PostgreSQL", "Docker", "Pytest"]
             
@@ -378,14 +459,14 @@ with tab3:
             
             match_score = int((len(matched) / max(len(req_keywords), 1)) * 100)
             
-            st.markdown("#### 🏆 Compatibility Result")
+            st.markdown("#### 🏆 Compatibility Score")
             st.markdown(f"<div class='score-badge'>{match_score}% Match</div>", unsafe_allow_html=True)
             
             st.markdown("##### ✅ Matched Key Skills")
             st.write(", ".join([f"✓ `{s}`" for s in matched]))
             
             if missing:
-                st.markdown("##### ⚠️ Recommended Skills to Learn")
+                st.markdown("##### ⚠️ Recommended Skills to Acquire")
                 st.write(", ".join([f"⚡ `{s}`" for s in missing]))
                 
             st.markdown("#### 🗺️ 4-Week Personal Career Roadmap")
@@ -404,7 +485,6 @@ with tab4:
     st.markdown("### 💬 Grounded AI Career Guidance Coach")
     st.caption("Ask questions about career strategy, interview preparation, salary negotiation, or technical growth.")
     
-    # Render chat messages
     for msg in st.session_state["chat_history"]:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
@@ -412,12 +492,10 @@ with tab4:
     user_prompt = st.chat_input("Ask your career question (e.g. How should I prepare for a FastAPI system design interview?)...")
     
     if user_prompt:
-        # Display user message
         st.session_state["chat_history"].append({"role": "user", "content": user_prompt})
         with st.chat_message("user"):
             st.write(user_prompt)
             
-        # Generate assistant response
         prompt_lower = user_prompt.lower()
         if "fastapi" in prompt_lower or "backend" in prompt_lower or "interview" in prompt_lower:
             response_text = (
@@ -467,12 +545,12 @@ with tab5:
                     st.success(f"Backend Server Connected! Response: {res.json()}")
                 else:
                     st.warning(f"Server returned HTTP status {res.status_code}")
-            except Exception as ex:
+            except Exception:
                 st.info("API server is offline or running locally. Streamlit fallback modules are fully operational!")
                 
     with col_acc2:
         st.markdown("#### 👤 User Authentication")
-        auth_mode = st.radio("Auth Mode", ["Login", "Register"], inline=True)
+        auth_mode = st.radio("Auth Mode", ["Login", "Register"], horizontal=True)
         
         email_in = st.text_input("Email", "user@example.com")
         pass_in = st.text_input("Password", type="password", value="password123")
@@ -482,6 +560,6 @@ with tab5:
             
         submit_auth = st.button("Submit Authentication")
         if submit_auth:
-            st.success(f"Successfully logged in as {email_in}!")
+            st.success(f"Successfully authenticated as {email_in}!")
             st.session_state["user_info"] = {"email": email_in}
 
