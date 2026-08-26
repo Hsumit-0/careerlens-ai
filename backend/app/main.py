@@ -1,9 +1,11 @@
 import logging
+import os
 import time
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.api.v1.router import api_router
 from app.core.config import settings
@@ -82,7 +84,28 @@ async def health_check():
 # Include V1 API Router
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
+# Static assets directory resolution (Flutter Web build output if available)
+WEB_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "..", "mobile", "build", "web")
+if not os.path.exists(WEB_DIR):
+    WEB_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
+
+if os.path.exists(WEB_DIR):
+    app.mount("/", StaticFiles(directory=WEB_DIR, html=True), name="web")
+else:
+    @app.get("/", tags=["Root"])
+    async def root():
+        return {
+            "name": settings.PROJECT_NAME,
+            "version": settings.VERSION,
+            "status": "online",
+            "documentation": f"{settings.API_V1_STR}/docs",
+            "health": "/health"
+        }
+
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)
+
+

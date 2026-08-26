@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
@@ -80,15 +79,19 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
     redirect: (context, state) {
       final status = authState.status;
-      final isLoggingIn = state.matchedLocation == '/login' ||
-          state.matchedLocation == '/register' ||
-          state.matchedLocation == '/splash';
+      final isSplash = state.matchedLocation == '/splash';
+      final isAuthPage = state.matchedLocation == '/login' ||
+          state.matchedLocation == '/register';
 
-      if (status == AuthStatus.unauthenticated && !isLoggingIn) {
-        return '/login';
+      if (status == AuthStatus.unauthenticated) {
+        if (isSplash || !isAuthPage) {
+          return '/login';
+        }
       }
-      if (status == AuthStatus.authenticated && isLoggingIn) {
-        return '/dashboard';
+      if (status == AuthStatus.authenticated) {
+        if (isSplash || isAuthPage) {
+          return '/dashboard';
+        }
       }
       return null;
     },

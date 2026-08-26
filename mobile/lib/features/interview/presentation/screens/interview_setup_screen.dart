@@ -18,7 +18,7 @@ class InterviewSetupScreen extends ConsumerStatefulWidget {
 class _InterviewSetupScreenState extends ConsumerState<InterviewSetupScreen> {
   final _roleController = TextEditingController(text: 'Backend Developer');
   String _selectedMode = 'full_mock';
-  String _selectedDifficulty = 'intermediate';
+  final String _selectedDifficulty = 'intermediate';
 
   final List<Map<String, String>> _modes = [
     {
@@ -56,7 +56,7 @@ class _InterviewSetupScreenState extends ConsumerState<InterviewSetupScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'AI Interview Studio',
+          'AI Interview Studio Setup',
           style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 20),
         ),
       ),
@@ -70,26 +70,33 @@ class _InterviewSetupScreenState extends ConsumerState<InterviewSetupScreen> {
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       gradient: AppTheme.primaryGradient,
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.primaryColor.withOpacity(0.35),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
-                    child: const Icon(Icons.videocam_outlined, color: Colors.white, size: 28),
+                    child: const Icon(Icons.videocam_outlined, color: Colors.white, size: 30),
                   ),
-                  const SizedBox(width: 14),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Personalized Mock Studio',
+                          'Personalized AI Studio',
                           style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: 3),
                         Text(
-                          'AI-generated questions based on your resume & target job role.',
-                          style: GoogleFonts.inter(fontSize: 12, color: Colors.grey.shade600),
+                          'Simulate real interview environments with real-time speech analytics & instant AI scoring.',
+                          style: GoogleFonts.inter(fontSize: 12, color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, height: 1.4),
                         ),
                       ],
                     ),
@@ -101,13 +108,13 @@ class _InterviewSetupScreenState extends ConsumerState<InterviewSetupScreen> {
             const SizedBox(height: 24),
 
             // Target Role
-            Text('Target Job Role', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('Target Position / Job Title', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             TextField(
               controller: _roleController,
               decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.work_outline_rounded),
-                hintText: 'e.g. Backend Developer, Data Scientist',
+                prefixIcon: Icon(Icons.work_outline_rounded, color: AppTheme.primaryColor),
+                hintText: 'e.g. Senior Backend Developer, Machine Learning Engineer',
               ),
             ),
 
@@ -120,47 +127,42 @@ class _InterviewSetupScreenState extends ConsumerState<InterviewSetupScreen> {
               final isSelected = _selectedMode == mode['id'];
               return Padding(
                 padding: const EdgeInsets.only(bottom: 10),
-                child: InkWell(
+                child: GlassCard(
                   onTap: () => setState(() => _selectedMode = mode['id']!),
-                  borderRadius: BorderRadius.circular(14),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? AppTheme.primaryColor.withOpacity(0.12)
-                          : (isDark ? const Color(0xFF1E293B) : Colors.white),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: isSelected ? AppTheme.primaryColor : (isDark ? Colors.grey.shade800 : Colors.grey.shade300),
-                        width: isSelected ? 2 : 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                mode['title']!,
-                                style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                mode['desc']!,
-                                style: GoogleFonts.inter(fontSize: 12, color: Colors.grey.shade600),
-                              ),
-                            ],
-                          ),
+                  borderColor: isSelected ? AppTheme.primaryColor : null,
+                  backgroundGradient: isSelected ? AppTheme.ambientGlowGradient : null,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              mode['title']!,
+                              style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              mode['desc']!,
+                              style: GoogleFonts.inter(fontSize: 12, color: isDark ? Colors.grey.shade400 : Colors.grey.shade600),
+                            ),
+                          ],
                         ),
-                        if (isSelected)
-                          const Icon(Icons.check_circle_rounded, color: AppTheme.primaryColor, size: 22),
-                      ],
-                    ),
+                      ),
+                      if (isSelected)
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: AppTheme.primaryColor,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.check_rounded, color: Colors.white, size: 16),
+                        ),
+                    ],
                   ),
                 ),
               );
-            }).toList(),
+            }),
 
             const SizedBox(height: 20),
 
@@ -169,8 +171,8 @@ class _InterviewSetupScreenState extends ConsumerState<InterviewSetupScreen> {
               child: Column(
                 children: [
                   SwitchListTile(
-                    title: Text('Enable Camera Preview', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600)),
-                    subtitle: Text('Allows visual engagement feedback (strictly optional & private)', style: GoogleFonts.inter(fontSize: 11, color: Colors.grey)),
+                    title: Text('Enable Camera Stream', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600)),
+                    subtitle: Text('Allows visual posture feedback (100% private, processed client-side)', style: GoogleFonts.inter(fontSize: 11, color: Colors.grey)),
                     value: state.cameraEnabled,
                     onChanged: (val) {
                       if (val) {
@@ -187,8 +189,8 @@ class _InterviewSetupScreenState extends ConsumerState<InterviewSetupScreen> {
                   ),
                   const Divider(height: 1),
                   SwitchListTile(
-                    title: Text('Enable Microphone Answer', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600)),
-                    subtitle: Text('Enables speech-to-text transcript & filler word analysis', style: GoogleFonts.inter(fontSize: 11, color: Colors.grey)),
+                    title: Text('Enable Voice Recording & Speech Analysis', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600)),
+                    subtitle: Text('Enables real-time speech-to-text transcript & clarity metrics', style: GoogleFonts.inter(fontSize: 11, color: Colors.grey)),
                     value: state.micEnabled,
                     onChanged: (_) => ref.read(interviewNotifierProvider.notifier).toggleMic(),
                     activeColor: AppTheme.primaryColor,
@@ -201,7 +203,7 @@ class _InterviewSetupScreenState extends ConsumerState<InterviewSetupScreen> {
 
             // Start Button
             PrimaryButton(
-              text: 'Start AI Mock Interview',
+              text: 'Launch AI Mock Session',
               icon: Icons.play_arrow_rounded,
               isLoading: state.isLoading,
               onPressed: () async {
@@ -221,3 +223,4 @@ class _InterviewSetupScreenState extends ConsumerState<InterviewSetupScreen> {
     );
   }
 }
+
