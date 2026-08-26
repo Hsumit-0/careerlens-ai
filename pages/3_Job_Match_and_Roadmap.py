@@ -6,17 +6,10 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from auth_widget import render_sidebar_auth
 
-st.set_page_config(
-    page_title="Job Match & Roadmap - CareerLens AI",
-    page_icon="📊",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
-render_sidebar_auth()
 
 st.markdown("""
 <style>
+
     .stApp {
         background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
         color: #f8fafc !important;

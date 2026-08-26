@@ -1,11 +1,11 @@
 import os
 import sys
 import streamlit as st
+from auth_widget import render_sidebar_auth
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from auth_widget import render_sidebar_auth
-
+# Page Configuration
 st.set_page_config(
     page_title="CareerLens AI - Personal Career Intelligence",
     page_icon="🔍",
@@ -13,149 +13,28 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Define Official Streamlit Page Objects
+p_home = st.Page("pages/0_Home.py", title="Home Overview", icon="🏠", default=True)
+p_interview = st.Page("pages/1_AI_Mock_Interview.py", title="AI Mock Interview", icon="🎯")
+p_resume = st.Page("pages/2_Resume_Analyzer.py", title="Resume Analyzer", icon="📄")
+p_roadmap = st.Page("pages/3_Job_Match_and_Roadmap.py", title="Job Match & Roadmap", icon="📊")
+p_coach = st.Page("pages/4_AI_Career_Coach.py", title="AI Career Coach", icon="💬")
+
+# Check for dynamic target page request
+if st.session_state.get("target_page"):
+    target = st.session_state.pop("target_page")
+    page_map = {
+        "pages/1_AI_Mock_Interview.py": p_interview,
+        "pages/2_Resume_Analyzer.py": p_resume,
+        "pages/3_Job_Match_and_Roadmap.py": p_roadmap,
+        "pages/4_AI_Career_Coach.py": p_coach,
+    }
+    if target in page_map:
+        st.switch_page(page_map[target])
+
+pg = st.navigation({
+    "CareerLens AI Modules": [p_home, p_interview, p_resume, p_roadmap, p_coach]
+})
+
 render_sidebar_auth()
-
-st.markdown("""
-<style>
-    /* Main Theme */
-    .stApp {
-        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
-        color: #f8fafc !important;
-    }
-    p, span, label, div, h1, h2, h3, h4, h5, h6,
-    .stMarkdown, .stText, [data-testid="stWidgetLabel"] p {
-        color: #f8fafc !important;
-    }
-
-    /* Force Dark Navy Sidebar with High Contrast White Text */
-    [data-testid="stSidebar"] {
-        background-color: #0f172a !important;
-        border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
-    }
-    [data-testid="stSidebar"] p,
-    [data-testid="stSidebar"] span,
-    [data-testid="stSidebar"] label,
-    [data-testid="stSidebar"] h1,
-    [data-testid="stSidebar"] h2,
-    [data-testid="stSidebar"] h3,
-    [data-testid="stSidebar"] h4,
-    [data-testid="stSidebar"] div,
-    [data-testid="stSidebar"] .stMarkdown {
-        color: #f8fafc !important;
-    }
-    [data-testid="stSidebar"] input {
-        background-color: #1e293b !important;
-        color: #ffffff !important;
-        border: 1px solid #475569 !important;
-        border-radius: 6px !important;
-    }
-    [data-testid="stSidebar"] button {
-        background: linear-gradient(90deg, #2563eb 0%, #7c3aed 100%) !important;
-        color: #ffffff !important;
-        border-radius: 8px !important;
-        border: none !important;
-    }
-    [data-testid="stSidebar"] button p, [data-testid="stSidebar"] button span {
-        color: #ffffff !important;
-        font-weight: 700 !important;
-    }
-
-    /* Banner Container */
-    .header-box {
-        background: rgba(30, 41, 59, 0.85);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 16px;
-        padding: 28px;
-        margin-bottom: 28px;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
-    }
-    .title-gradient {
-        background: linear-gradient(90deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-size: 2.8rem;
-        font-weight: 800;
-        margin-bottom: 6px;
-    }
-    .glass-card {
-        background: rgba(30, 41, 59, 0.7);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 14px;
-        padding: 24px;
-        margin-bottom: 14px;
-    }
-
-    /* Primary Action Buttons */
-    .stButton > button {
-        background: linear-gradient(90deg, #2563eb 0%, #7c3aed 100%) !important;
-        color: #ffffff !important;
-        font-weight: 700 !important;
-        border-radius: 10px !important;
-        padding: 12px 24px !important;
-        font-size: 1.05rem !important;
-        border: 1px solid #60a5fa !important;
-        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35) !important;
-    }
-    .stButton > button p, .stButton > button span {
-        color: #ffffff !important;
-        font-weight: 700 !important;
-    }
-</style>
-""", unsafe_allow_html=True)
-
-st.markdown("""
-<div class="header-box">
-    <div class="title-gradient">🔍 CareerLens AI</div>
-    <div style="color: #cbd5e1; font-size: 1.25rem; font-weight: 500; margin-top: 8px;">
-        An Explainable and Fair Agentic AI System for Personal Career Intelligence & Live AI Mock Interviews
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-if st.session_state.get("user_authenticated"):
-    st.success(f"👋 Welcome back, **{st.session_state['user_name']}** ({st.session_state['user_email']})!")
-
-st.markdown("## 🚀 Explore CareerLens AI Modules")
-st.caption("Click any button below or select from the left sidebar menu to open a module:")
-
-col1, col2 = st.columns(2)
-
-with col1:
-    st.markdown("""
-    <div class="glass-card">
-        <h3>🎯 1. AI Mock Interview Practice</h3>
-        <p style="color: #cbd5e1;">Live WebCam video stream and real-time speech-to-text microphone transcription with instant STAR framework scoring, WPM pace, and filler word detection.</p>
-    </div>
-    """, unsafe_allow_html=True)
-    if st.button("🚀 Launch AI Mock Interview Practice", key="btn_nav_p1", use_container_width=True):
-        st.switch_page("pages/1_AI_Mock_Interview.py")
-
-    st.markdown("""
-    <div class="glass-card" style="margin-top: 24px;">
-        <h3>📄 2. Resume PDF Analyzer</h3>
-        <p style="color: #cbd5e1;">Upload PDF resumes to extract technical skills, domain strengths, and profile readiness.</p>
-    </div>
-    """, unsafe_allow_html=True)
-    if st.button("📄 Open Resume Analyzer", key="btn_nav_p2", use_container_width=True):
-        st.switch_page("pages/2_Resume_Analyzer.py")
-
-with col2:
-    st.markdown("""
-    <div class="glass-card">
-        <h3>📊 3. Job Compatibility & Roadmap</h3>
-        <p style="color: #cbd5e1;">Compare your candidate profile against target job descriptions, calculate match score %, and generate a 4-week learning roadmap.</p>
-    </div>
-    """, unsafe_allow_html=True)
-    if st.button("📊 Open Job Compatibility & Roadmap", key="btn_nav_p3", use_container_width=True):
-        st.switch_page("pages/3_Job_Match_and_Roadmap.py")
-
-    st.markdown("""
-    <div class="glass-card" style="margin-top: 24px;">
-        <h3>💬 4. AI Career Coach</h3>
-        <p style="color: #cbd5e1;">Interactive conversational AI assistant providing grounded career advice, interview strategy, and ATS resume tips.</p>
-    </div>
-    """, unsafe_allow_html=True)
-    if st.button("💬 Chat with AI Career Coach", key="btn_nav_p4", use_container_width=True):
-        st.switch_page("pages/4_AI_Career_Coach.py")
+pg.run()

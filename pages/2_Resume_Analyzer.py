@@ -13,17 +13,10 @@ try:
 except ImportError:
     PYPDF_AVAILABLE = False
 
-st.set_page_config(
-    page_title="Resume Analyzer - CareerLens AI",
-    page_icon="📄",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
-render_sidebar_auth()
 
 st.markdown("""
 <style>
+
     .stApp {
         background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
         color: #f8fafc !important;
